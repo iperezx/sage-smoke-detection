@@ -1,0 +1,2 @@
+authors: Ismael Perez <i3perez@sdsc.edu>
+license: MIT license
