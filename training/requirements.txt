@@ -1,0 +1,13 @@
+pillow
+pika
+git+https://github.com/sagecontinuum/sage-cli.git
+git+https://github.com/waggle-sensor/pywaggle@v0.29.0
+notebook
+matplotlib
+opencv-python
+regex
+tensorflow-gpu==2.0.0
+keras
+gitsome
+sklearn_pandas
+cntk-gpu

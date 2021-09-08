@@ -1,0 +1,9 @@
+pillow
+pika
+tflite
+https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp36-cp36m-linux_armv7l.whl; platform_machine == "armv7l"
+https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp36-cp36m-linux_aarch64.whl; platform_machine == "aarch64"
+https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp36-cp36m-macosx_10_14_x86_64.whl; sys_platform == "darwin" and platform_machine == "x86_64"
+https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp36-cp36m-linux_x86_64.whl; sys_platform == "linux" and platform_machine == "x86_64"
+git+https://github.com/sagecontinuum/sage-cli.git
+git+https://github.com/waggle-sensor/pywaggle@v0.31.0

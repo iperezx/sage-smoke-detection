@@ -1,0 +1,37 @@
+{
+    "arguments": "", 
+    "baseCommand": "", 
+    "depends_on": "", 
+    "description": "Smoke Detection Plugin", 
+    "inputs": [
+      {
+        "id": "speed", 
+        "type": "int"
+      }
+    ], 
+    "metadata": {
+      "my-science-data": 12345
+    }, 
+    "name": "smokedetection", 
+    "namespace": "sage", 
+    "owner": "testuser", 
+    "sources": [
+      {
+        "architectures": [
+          "linux/amd64"
+        ], 
+        "branch": "master", 
+        "build_args": {
+          "BUCKET_ID_MODEL": "ccccac6e-c911-4bef-8e15-5b041457ec41", 
+          "BUCKET_ID_TRAINING": "26be7542-679d-4218-906d-a74bb6b0d011", 
+          "HPWREN_FLAG": "False", 
+          "SAGE_HOST": "https://sage-storage-api.nautilus.optiputer.net"
+        }, 
+        "directory": "plugin-smokedetect", 
+        "dockerfile": "Dockerfile", 
+        "name": "default", 
+        "url": "https://github.com/iperezx/edge-plugins.git"
+      }
+    ], 
+    "version": "0.5.0"
+  }

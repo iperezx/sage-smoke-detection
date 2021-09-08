@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keras
+  namespace: sage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: keras
+  template:
+    metadata:
+      labels:
+        k8s-app: keras
+    spec:
+      tolerations:
+      - key: "region"
+        operator: "Equal"
+        value: "allow"
+        effect: "NoSchedule"
+      containers:
+      - name: keras
+        image: iperezx/training-smokedetect:0.1.0
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        command: ["/bin/sh", "-c"]
+        args: ["sleep infinity"]
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            memory: "64Gi"
+            cpu: "8"
+          requests:
+            memory: "32Gi"
+            cpu: "4"
+
+        volumeMounts:
+        - mountPath: /userdata/kerasData
+          name: modeltraining
+      volumes:
+        - name: modeltraining
+          persistentVolumeClaim:
+            claimName: modeltraining
