@@ -1,3 +1,6 @@
+pillow
+pika
+tflite
+requests
 https://github.com/waggle-sensor/pywaggle/archive/0.43.2.zip
---index-url https://google-coral.github.io/py-repo/ 
-tflite_runtime
+--extra-index-url https://google-coral.github.io/py-repo/ tflite_runtime
