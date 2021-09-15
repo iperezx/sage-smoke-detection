@@ -1,9 +1,14 @@
-FROM waggle/plugin-tensorflow:2.0.0
+FROM waggle/plugin-base:1.1.1-base
 COPY . .
 WORKDIR /src
 RUN pip3 install --upgrade pip
 RUN pip3 install -r /src/requirements.txt
 RUN mkdir -p /data/model/
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 ARG SAGE_STORE_URL="HOST"
 ARG BUCKET_ID_MODEL="BUCKET_ID_MODEL"
 ARG LC_ALL="C.UTF-8"
@@ -14,12 +19,12 @@ ENV LC_ALL="C.UTF-8" \
     LANG="C.UTF-8" \
     WAGGLE_PLUGIN_ID="50" \
     WAGGLE_PLUGIN_NAME="Smoke Detection Model" \
-    WAGGLE_PLUGIN_VERSION="0.4.0" \
+    WAGGLE_PLUGIN_VERSION="0.1.0" \
     WAGGLE_PLUGIN_INSTANCE="1" \
     WAGGLE_PLUGIN_REF="https://github.com/iperezx/edge-plugins/tree/master/plugin-smokedetect" \
     SAGE_STORE_URL=${SAGE_STORE_URL} \
     BUCKET_ID_MODEL=${BUCKET_ID_MODEL} \
     HPWREN_FLAG=${HPWREN_FLAG}
 
-RUN sage-cli.py storage files download ${BUCKET_ID_MODEL}  model.tflite --target /data/model/model.tflite
+RUN curl "${SAGE_STORE_URL}/api/v1/objects/${BUCKET_ID_MODEL}/ 2021-05-11/model.tflite"  -H "Authorization: sage ${SAGE_USER_TOKEN}" --output /data/model/model.tflite
 CMD [ "python3","/src/main.py" ]

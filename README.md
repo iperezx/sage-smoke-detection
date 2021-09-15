@@ -7,10 +7,10 @@ Before building the image make sure that the environment variables (`SAGE_STORE_
 
 Set enviroment variables:
 ```
-export SAGE_STORE_URL=https://sage-storage-api.nautilus.optiputer.net
+export SAGE_STORE_URL=https://osn.sagecontinuum.org
 export BUCKET_ID_TRAINING=BUCKET_ID_TRAINING
 export BUCKET_ID_MODEL=BUCKET_ID_MODEL
-export HPWREN_FLAG=True
+export HPWREN_FLAG=False
 ```
 To obtain a token, visit the [Sage Authorization UI](https://sage.nautilus.optiputer.net).
 The `BUCKET_ID_MODEL` has been set public so any SAGE user can access the smoke detection models.
@@ -18,13 +18,13 @@ The `BUCKET_ID_MODEL` has been set public so any SAGE user can access the smoke 
 Build the image:
 ```
 docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} \
---build-arg HPWREN_FLAG=${HPWREN_FLAG}   -t sagecontinuum/plugin-smokedetect:0.5.0 .
+--build-arg HPWREN_FLAG=${HPWREN_FLAG}   -t sagecontinuum/sage-smoke-detection:0.1.0 .
 ```
 where the `--build-arg` adds all the necessary enviroment variables for the [Sage Storage API](https://github.com/sagecontinuum/sage-storage-api) and [Sage CLI](https://github.com/sagecontinuum/sage-cli)
 
 Run the container(optional since the waggle-node will run it automatically):
 ```
-docker run sagecontinuum/plugin-smokedetect:0.5.0
+docker run sagecontinuum/sage-smoke-detection:0.1.0
 ```
 # Instructions
 The following instructions are meant to serve a user from start to finish of how to create the smoke detection plugin.
@@ -78,7 +78,7 @@ If there is no kubernetes cluster available for the user, there is a docker file
 
 Build docker image:
 ```
-docker build --build-arg SAGE_HOST=${SAGE_HOST} --build-arg SAGE_USER_TOKEN=${SAGE_USER_TOKEN} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} -t iperezx/training-smokedetect:0.1.0 .
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg SAGE_USER_TOKEN=${SAGE_USER_TOKEN} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} -t iperezx/training-smokedetect:0.1.0 .
 ```
 
 Run docker image:

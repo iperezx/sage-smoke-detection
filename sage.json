@@ -22,16 +22,15 @@
         ], 
         "branch": "master", 
         "build_args": {
-          "BUCKET_ID_MODEL": "ccccac6e-c911-4bef-8e15-5b041457ec41", 
-          "BUCKET_ID_TRAINING": "26be7542-679d-4218-906d-a74bb6b0d011", 
+          "BUCKET_ID_MODEL": "719e3f3f-2905-429e-9ef5-20a03436af95", 
           "HPWREN_FLAG": "False", 
-          "SAGE_HOST": "https://sage-storage-api.nautilus.optiputer.net"
+          "SAGE_STORE_URL": "https://sage-storage-api.nautilus.optiputer.net"
         }, 
-        "directory": "plugin-smokedetect", 
+        "directory": ".", 
         "dockerfile": "Dockerfile", 
         "name": "default", 
-        "url": "https://github.com/iperezx/edge-plugins.git"
+        "url": "https://github.com/iperezx/sage-smoke-detection.git"
       }
     ], 
-    "version": "0.5.0"
+    "version": "0.1.0"
   }

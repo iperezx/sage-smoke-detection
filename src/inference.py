@@ -13,11 +13,14 @@ class FireImage:
     def __init__(self):
         self.image = None
     
+    def setImage(self,image):
+        self.image=image
+    
     def readImage(self, imagePath):
         image = Image.open(imagePath)
         img = np.array(image.resize(FireImage.newsize))
         img = img.astype("float32") / 255.0
-        self.image = img
+        self.setImage(img)
 
     def urlToImage(self,url):
         img = None    
@@ -31,7 +34,7 @@ class FireImage:
             print(f'HTTP error occurred: {http_err}')  
         except Exception as err:
             print(f'Other error occurred: {err}')
-        self.image = img
+        self.setImage(img)
 
     def inference(self, tf_lite_interpreter):
         try:
