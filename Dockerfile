@@ -5,10 +5,6 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -r /src/requirements.txt
 RUN mkdir -p /data/model/
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
 ARG SAGE_STORE_URL="HOST"
 ARG BUCKET_ID_MODEL="BUCKET_ID_MODEL"
 ARG LC_ALL="C.UTF-8"
@@ -26,5 +22,5 @@ ENV LC_ALL="C.UTF-8" \
     BUCKET_ID_MODEL=${BUCKET_ID_MODEL} \
     HPWREN_FLAG=${HPWREN_FLAG}
 
-RUN curl "${SAGE_STORE_URL}/api/v1/objects/${BUCKET_ID_MODEL}/ 2021-05-11/model.tflite"  -H "Authorization: sage ${SAGE_USER_TOKEN}" --output /data/model/model.tflite
+RUN sage-cli.py storage files download ${BUCKET_ID_MODEL} 2021-05-11/model.tflite --target /data/model/model.tflite
 CMD [ "python3","/src/main.py" ]
