@@ -12,10 +12,16 @@ class FireImage:
     classes = ["No Fire", "Fire"]
     def __init__(self):
         self.image = None
-    
+
     def setImage(self,image):
         self.image=image
     
+    def setImageFromArray(self,array):
+        image = Image.fromarray(array)
+        img = np.array(image.resize(FireImage.newsize))
+        img = img.astype("float32") / 255.0
+        self.setImage(img)
+
     def readImage(self, imagePath):
         image = Image.open(imagePath)
         img = np.array(image.resize(FireImage.newsize))
@@ -58,7 +64,6 @@ class FireImage:
             value = output[0][j]
             percent = "{:.2%}".format(output[0][j])
             ans = f"{FireImage.classes[j]}, {percent}"
-
             return  [ans,float(value)]
         else:
             return "ERROR! Image input is not in correct dimensions!"
