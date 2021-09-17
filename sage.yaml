@@ -5,10 +5,11 @@ namespace: "iperezx"
 authors: "Ismael Perez <i3perez@sdsc.edu>"
 license: "MIT license"
 homepage: "https://github.com/iperezx/sage-smoke-detection"
-keywords: "machine learning, convolutional neural network, image segmentation, smoke, hpwren"
+keywords: "machine learning, convolutional neural network, image classification, smoke, hpwren"
 source:
     architectures:
       - linux/amd64
+      - linux/arm64
     url: "https://github.com/iperezx/sage-smoke-detection"
     branch: master
     build_args:
