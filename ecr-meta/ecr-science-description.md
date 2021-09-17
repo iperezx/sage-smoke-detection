@@ -10,6 +10,9 @@ The edge compute environment consist of the sensor data acquisition system (HPWR
 
 ### References
 [1] John Salguero, Jingjing Li, Alireza Farahmand, and John T. Reager. 2020. Wild-fire Trend Analysis over the Contiguous United States Using Remote SensingObservations.Remote Sensing12, 16 (2020). https://doi.org/10.3390/rs12162565.
+
 [2] Kinshuk Govil, Morgan L. Welch, J. Timothy Ball, and Carlton R. Pennypacker.2020. Preliminary Results from a Wildfire Detection System Using Deep Learningon Remote Camera Images.Remote Sensing12, 1 (Jan 2020), 166.https://doi.org/10.3390/rs12010166
+
 [3] 2021. Website for High Performance Wireless Research and Education Network.http://hpwren.ucsd.edu
+
 [4] 2021. Labeled Training Data for Smoke Detection in the HPWREN Fire IgnitionImage Library. http://hpwren.ucsd.edu/HPWREN-FIgLib/
