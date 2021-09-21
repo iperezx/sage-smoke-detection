@@ -3,7 +3,6 @@ COPY . .
 WORKDIR /src
 RUN pip3 install --upgrade pip
 RUN pip3 install -r /src/requirements.txt
-RUN mkdir -p /data/model/
 
 ARG SAGE_STORE_URL="HOST"
 ARG BUCKET_ID_MODEL="BUCKET_ID_MODEL"
@@ -24,5 +23,5 @@ ENV LC_ALL="C.UTF-8" \
     HPWREN_FLAG=${HPWREN_FLAG} \
     TEST_FLAG=${TEST_FLAG}
 
-RUN sage-cli.py storage files download ${BUCKET_ID_MODEL} 2021-05-11/model.tflite --target /data/model/model.tflite
+RUN sage-cli.py storage files download ${BUCKET_ID_MODEL} 2021-05-11/model.tflite --target /src/model.tflite
 CMD [ "python3","/src/main.py" ]

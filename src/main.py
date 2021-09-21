@@ -10,9 +10,8 @@ from pathlib import Path
 
 TOPIC_SMOKE = "env.smoke.certainty"
 SMOKE_CRITERION_THRESHOLD=0.5
-object = 'model.tflite'
-directory = '/data/model/'
-modelPath = os.path.join(directory,object)
+modelFileName = 'model.tflite'
+modelPath = os.path.abspath(modelFileName)
 TEST_FLAG = strtobool(os.getenv('TEST_FLAG'))
 HPWREN_FLAG = strtobool(os.getenv('HPWREN_FLAG'))
 
