@@ -85,7 +85,7 @@ Example output of the plugin when HPWREN camera API is used( `export HPWREN_FLAG
 ```
 export SAGE_STORE_URL=https://osn.sagecontinuum.org
 export BUCKET_ID_MODEL=BUCKET_ID_MODEL
-export HPWREN_FLAG=False
+export HPWREN_FLAG=True
 export TEST_FLAG=False
 
 docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg SAGE_USER_TOKEN=${SAGE_USER_TOKEN} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
@@ -115,7 +115,7 @@ Example output of the plugin when the pre-recorded MP4 is used( `export HPWREN_F
 export SAGE_STORE_URL=https://osn.sagecontinuum.org
 export BUCKET_ID_MODEL=BUCKET_ID_MODEL
 export HPWREN_FLAG=False
-export TEST_FLAG=False
+export TEST_FLAG=True
 
 docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg SAGE_USER_TOKEN=${SAGE_USER_TOKEN} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
 
