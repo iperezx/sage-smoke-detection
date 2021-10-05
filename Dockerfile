@@ -2,7 +2,7 @@ FROM waggle/plugin-base:1.1.1-base
 COPY . .
 WORKDIR /src
 RUN pip3 install --upgrade pip
-RUN pip3 install -r /src/requirements.txt
+RUN pip3 install --upgrade -r /src/requirements.txt
 
 ARG SAGE_STORE_URL="HOST"
 ARG BUCKET_ID_MODEL="BUCKET_ID_MODEL"
