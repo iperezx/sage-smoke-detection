@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import inference,hpwren
 import tflite_runtime.interpreter as tflite
@@ -24,10 +25,13 @@ if TEST_FLAG and not HPWREN_FLAG:
     imageURL = sampleMP4
     description = 'Pre-recorded video'
 elif not TEST_FLAG and not HPWREN_FLAG:
-    cameraSrc = 'bottom_camera'
+    if len(sys.argv) < 2:
+        print(f'No camera device specified. Exiting...')
+        exit(1)
+    cameraSrc = sys.argv[1]
     serverName = cameraSrc
     imageURL = serverName
-    description = 'Bottom Camera on Device'
+    description = f'{cameraSrc} Camera on Device'
 elif not TEST_FLAG and HPWREN_FLAG:
     #HPWREN Parameters
     hpwrenUrl = "https://firemap.sdsc.edu/pylaski/"\
@@ -64,10 +68,10 @@ while True:
     percent = result[1]
     
     if percent >= SMOKE_CRITERION_THRESHOLD:
-        sample.save("smoke.jpg")
-        plugin.upload_file("smoke.jpg")
+        sample.save("sample.jpg")
+        plugin.upload_file("sample.jpg", timestamp=timestamp)
         print('Publish\n', flush=True)
-        plugin.publish(TOPIC_SMOKE, percent, timestamp=timestamp,meta={"camera":"bottom"})
+        plugin.publish(TOPIC_SMOKE, percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
     
     time.sleep(5)
 
