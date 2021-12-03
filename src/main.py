@@ -48,30 +48,27 @@ camera = Camera(cameraSrc)
 
 
 print('Starting smoke detection inferencing')
-while True:
-    testObj = inference.FireImage()
-    
-    print('Get image from ' + serverName)
-    print("Image url: " + imageURL)
-    print("Description: " + description)
+testObj = inference.FireImage()
+
+print('Get image from ' + serverName)
+print("Image url: " + imageURL)
+print("Description: " + description)
 
 
-    sample = camera.snapshot()
-    image = sample.data
-    timestamp = sample.timestamp
-    testObj.setImageFromArray(image)
+sample = camera.snapshot()
+image = sample.data
+timestamp = sample.timestamp
+testObj.setImageFromArray(image)
 
-    interpreter = tflite.Interpreter(model_path=modelPath)
-    interpreter.allocate_tensors()
-    print('Perform an inference based on trainned model')
-    result  = testObj.inference(interpreter)
-    percent = result[1]
-    
-    if percent >= SMOKE_CRITERION_THRESHOLD:
-        sample.save("sample.jpg")
-        plugin.upload_file("sample.jpg", timestamp=timestamp)
-        print('Publish\n', flush=True)
-        plugin.publish(TOPIC_SMOKE, percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
-    
-    time.sleep(5)
+interpreter = tflite.Interpreter(model_path=modelPath)
+interpreter.allocate_tensors()
+print('Perform an inference based on trainned model')
+result  = testObj.inference(interpreter)
+percent = result[1]
+
+if percent >= SMOKE_CRITERION_THRESHOLD:
+    sample.save("sample.jpg")
+    plugin.upload_file("sample.jpg", timestamp=timestamp)
+    print('Publish\n', flush=True)
+    plugin.publish(TOPIC_SMOKE, percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
 
