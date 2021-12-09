@@ -19,3 +19,5 @@ source:
       TEST_FLAG: "False"
 inputs: []
 metadata: {}
+funding: 'NSF 1935984'
+collaborators: 'Pete Beckman, Nicola Ferrier, Joseph Swantek, Neal Conrad, Raj Sankaran, Sean Shahkarami, Wolfgang Gerlach, Yongho Kim'
