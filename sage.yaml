@@ -1,23 +1,21 @@
-name: "smoke-detection"
-description: "Smoke Detection"
-version : "0.1.0"
+name: "wildfire-smoke-detection"
+description: "Wildfire Smoke Detection"
+version : "0.2.0"
 namespace: "iperezx"
 authors: "Ismael Perez <i3perez@sdsc.edu>"
 license: "MIT license"
 homepage: "https://github.com/iperezx/sage-smoke-detection"
 keywords: "machine learning, convolutional neural network, image classification, smoke, hpwren"
-source:
-    architectures:
-      - linux/amd64
-      - linux/arm64
-    url: "https://github.com/iperezx/sage-smoke-detection"
-    branch: master
-    build_args:
-      BUCKET_ID_MODEL: "719e3f3f-2905-429e-9ef5-20a03436af95"
-      SAGE_STORE_URL: "https://osn.sagecontinuum.org"
-      HPWREN_FLAG: "False"
-      TEST_FLAG: "False"
-inputs: []
-metadata: {}
 funding: 'NSF 1935984'
-collaborators: 'Pete Beckman, Nicola Ferrier, Joseph Swantek, Neal Conrad, Raj Sankaran, Sean Shahkarami, Wolfgang Gerlach, Yongho Kim'
+collaborators: 'Pete Beckman, Nicola Ferrier, Joseph Swantek, Neal Conrad, Raj Sankaran, Sean Shahkarami, Seongha Park, Wolfgang Gerlach, Yongho Kim'
+source:
+  architectures:
+    - linux/amd64
+    - linux/arm64
+  url: "https://github.com/iperezx/sage-smoke-detection"
+  branch: main
+  build_args:
+    BUCKET_ID_MODEL: "719e3f3f-2905-429e-9ef5-20a03436af95"
+    SAGE_STORE_URL: "https://osn.sagecontinuum.org"
+    HPWREN_FLAG: "False"
+    TEST_FLAG: "False"
