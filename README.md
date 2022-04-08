@@ -68,6 +68,7 @@ export SAGE_STORE_URL=https://osn.sagecontinuum.org
 export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
 export BUCKET_KEY_MODEL=2021-05-11
 export MODEL_FILE=model.tflite
+export MODEL_TYPE=binary-classifier
 export HPWREN_FLAG=False
 export TEST_FLAG=False
 ```
@@ -76,8 +77,7 @@ The `BUCKET_ID_MODEL` has been set public so any SAGE user can access the smoke 
 
 Build the image:
 ```
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} \
---build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
 ```
 where the `--build-arg` adds all the necessary enviroment variables for the [Sage Storage API](https://github.com/sagecontinuum/sage-storage-api) and [Sage CLI](https://github.com/sagecontinuum/sage-cli)
 
@@ -89,10 +89,11 @@ export SAGE_STORE_URL=https://osn.sagecontinuum.org
 export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
 export BUCKET_KEY_MODEL=2021-05-11
 export MODEL_FILE=model.tflite
+export MODEL_TYPE=binary-classifier
 export HPWREN_FLAG=True
 export TEST_FLAG=False
 
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
 
 docker run sagecontinuum/sage-smoke-detection:0.1.0 
 ```
@@ -120,10 +121,11 @@ export SAGE_STORE_URL=https://osn.sagecontinuum.org
 export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
 export BUCKET_KEY_MODEL=2021-05-11
 export MODEL_FILE=model.tflite
+export MODEL_TYPE=binary-classifier
 export HPWREN_FLAG=False
 export TEST_FLAG=True
 
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
 
 docker run sagecontinuum/sage-smoke-detection:0.1.0 
 ```
@@ -152,10 +154,11 @@ export SAGE_STORE_URL=https://osn.sagecontinuum.org
 export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
 export BUCKET_KEY_MODEL=2021-05-11
 export MODEL_FILE=model.tflite
+export MODEL_TYPE=binary-classifier
 export HPWREN_FLAG=False
 export TEST_FLAG=False
 
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
 
 docker run sagecontinuum/sage-smoke-detection:0.1.0 
 ```

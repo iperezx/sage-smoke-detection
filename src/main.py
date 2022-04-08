@@ -1,9 +1,7 @@
 import sys
-import numpy as np
-import inference,hpwren
-import tflite_runtime.interpreter as tflite
-import time,datetime,os,sys,subprocess
-import logging,requests
+from inference import BinaryFire,ImageProc
+import hpwren
+import os,sys
 from distutils.util import strtobool
 from waggle import plugin
 from waggle.data.vision import Camera
@@ -13,6 +11,7 @@ TOPIC_SMOKE = "env.smoke.certainty"
 SMOKE_CRITERION_THRESHOLD=0.5
 modelFileName = os.getenv('MODEL_FILE')
 modelPath = os.path.abspath(modelFileName)
+modelType = os.getenv('MODEL_TYPE')
 TEST_FLAG = strtobool(os.getenv('TEST_FLAG'))
 HPWREN_FLAG = strtobool(os.getenv('HPWREN_FLAG'))
 
@@ -50,7 +49,7 @@ camera = Camera(cameraSrc)
 
 
 print('Starting smoke detection inferencing')
-testObj = inference.FireImage()
+imageProc = ImageProc()
 
 print('Get image from ' + serverName)
 print("Image url: " + imageURL)
@@ -58,19 +57,19 @@ print("Description: " + description)
 
 
 sample = camera.snapshot()
-image = sample.data
+imageArray = sample.data
 timestamp = sample.timestamp
-testObj.setImageFromArray(image)
+image = imageProc.getImageFromArray(imageArray)
 
-interpreter = tflite.Interpreter(model_path=modelPath)
-interpreter.allocate_tensors()
 print('Perform an inference based on trainned model')
-result  = testObj.inference(interpreter)
-percent = result[1]
+if modelType == 'binary-classifier':
+    print('Using binary classifier')
+    binaryFire = BinaryFire(modelPath)
+    result  = binaryFire.inference(image)
+    percent = result[1]
 
 if percent >= SMOKE_CRITERION_THRESHOLD:
     sample.save("sample.jpg")
     plugin.upload_file("sample.jpg", timestamp=timestamp)
     print('Publish\n', flush=True)
     plugin.publish(TOPIC_SMOKE, percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
-
