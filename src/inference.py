@@ -1,6 +1,9 @@
+import onnx
+import onnxruntime
 import numpy as np
 import tflite_runtime.interpreter as tflite
 from PIL import Image
+import sys
 
 class ImageProc:
     def __init__(self):
@@ -48,3 +51,14 @@ class BinaryFire:
             return  [ans,float(value)]
         else:
             return "ERROR! Image input is not in correct dimensions!"
+
+class SmokeyNet:
+    def __init__(self,modelPath):
+        self.modelPath = modelPath
+        self.check_model()
+
+    def check_model(self):
+        onnx_model = onnx.load(self.modelPath)
+        result = onnx.checker.check_model(onnx_model)
+        if result is not None:
+            sys.exit('Onnx model failed checker')

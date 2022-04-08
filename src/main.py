@@ -1,5 +1,5 @@
 import sys
-from inference import BinaryFire,ImageProc
+from inference import BinaryFire,ImageProc,SmokeyNet
 import hpwren
 import os,sys
 from distutils.util import strtobool
@@ -67,6 +67,9 @@ if modelType == 'binary-classifier':
     binaryFire = BinaryFire(modelPath)
     result  = binaryFire.inference(image)
     percent = result[1]
+elif modelType == 'smokeynet':
+    print('Using Smokeynet')
+    smokeyNet = SmokeyNet(modelPath)
 
 if percent >= SMOKE_CRITERION_THRESHOLD:
     sample.save("sample.jpg")
