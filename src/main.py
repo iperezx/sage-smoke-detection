@@ -11,7 +11,7 @@ from pathlib import Path
 
 TOPIC_SMOKE = "env.smoke.certainty"
 SMOKE_CRITERION_THRESHOLD=0.5
-modelFileName = 'model.tflite'
+modelFileName = os.getenv('MODEL_FILE')
 modelPath = os.path.abspath(modelFileName)
 TEST_FLAG = strtobool(os.getenv('TEST_FLAG'))
 HPWREN_FLAG = strtobool(os.getenv('HPWREN_FLAG'))
@@ -43,6 +43,8 @@ elif not TEST_FLAG and HPWREN_FLAG:
     serverName = 'HPWREN Camera'
     imageURL,description = camObj.getImageURL(cameraID,siteID)
     cameraSrc = imageURL
+else:
+    sys.exit('Error: not supported case for TEST_FLAG and HPWREN_FLAG.')
 
 camera = Camera(cameraSrc)
 
