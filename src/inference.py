@@ -4,31 +4,38 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 from PIL import Image
 import sys
-
-class ImageProc:
-    def __init__(self):
-        self.newsize = (128,128)
-        self.scalingfactor = 255.0
-    
-    def getImageFromArray(self,array):
-        image = Image.fromarray(array)
-        img = np.array(image.resize(self.newsize))
-        img = img.astype("float32") / self.scalingfactor
-        return img
-
 class BinaryFire:
     def __init__(self,modelPath):
         self.classes = ["No Fire", "Fire"]
         self.modelPath = modelPath
         self.setInterpreter()
+        self.newsize = (128,128)
+        self.scalingfactor = 255.0
+        self.image = None
+
+    def setImage(self,image):
+        self.image=image
+    
+    def setImageFromArray(self,array):
+        image = Image.fromarray(array)
+        img = np.array(image.resize(self.newsize))
+        img = img.astype("float32") / self.scalingfactor
+        self.setImage(img)
+
+    def getImageFromArray(self,array):
+        image = Image.fromarray(array)
+        img = np.array(image.resize(self.newsize))
+        img = img.astype("float32") / self.scalingfactor
+        return img
     
     def setInterpreter(self):
         interpreter = tflite.Interpreter(model_path=self.modelPath)
         interpreter.allocate_tensors()
         self.interpreter = interpreter
 
-    def inference(self,image):
+    def inference(self):
         try:
+            image = self.image
             input_data = np.expand_dims(image, axis=0)
             image_shape = input_data.shape
         except AttributeError:

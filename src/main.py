@@ -1,5 +1,5 @@
 import sys
-from inference import BinaryFire,ImageProc,SmokeyNet
+from inference import BinaryFire,SmokeyNet
 import hpwren
 import os,sys
 from distutils.util import strtobool
@@ -49,8 +49,6 @@ camera = Camera(cameraSrc)
 
 
 print('Starting smoke detection inferencing')
-imageProc = ImageProc()
-
 print('Get image from ' + serverName)
 print("Image url: " + imageURL)
 print("Description: " + description)
@@ -59,13 +57,13 @@ print("Description: " + description)
 sample = camera.snapshot()
 imageArray = sample.data
 timestamp = sample.timestamp
-image = imageProc.getImageFromArray(imageArray)
 
 print('Perform an inference based on trainned model')
 if modelType == 'binary-classifier':
     print('Using binary classifier')
     binaryFire = BinaryFire(modelPath)
-    result  = binaryFire.inference(image)
+    binaryFire.setImageFromArray(imageArray)
+    result  = binaryFire.inference()
     percent = result[1]
 elif modelType == 'smokeynet':
     print('Using Smokeynet')
