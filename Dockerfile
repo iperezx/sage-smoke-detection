@@ -29,6 +29,5 @@ ENV LC_ALL="C.UTF-8" \
     HPWREN_FLAG=${HPWREN_FLAG} \
     TEST_FLAG=${TEST_FLAG}
 
-#RUN sage-cli.py storage files download ${BUCKET_ID_MODEL} ${BUCKET_KEY_MODEL}/${MODEL_FILE} --target /src/${MODEL_FILE}
-COPY model.onnx /src/model.onnx
+RUN sage-cli.py storage files download ${BUCKET_ID_MODEL} ${BUCKET_KEY_MODEL}/${MODEL_FILE} --target /src/${MODEL_FILE}
 CMD [ "python3","/src/main.py" ]
