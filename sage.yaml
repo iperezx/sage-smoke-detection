@@ -5,7 +5,7 @@ namespace: "iperezx"
 authors: "Ismael Perez <i3perez@sdsc.edu>"
 license: "MIT license"
 homepage: "https://github.com/iperezx/sage-smoke-detection"
-keywords: "machine learning, convolutional neural network, image classification, smoke, hpwren"
+keywords: "machine learning, long short-term memory networks, image classification, smoke, hpwren"
 funding: 'NSF 1935984'
 collaborators: 'Pete Beckman, Nicola Ferrier, Joseph Swantek, Neal Conrad, Raj Sankaran, Sean Shahkarami, Seongha Park, Wolfgang Gerlach, Yongho Kim'
 source:
