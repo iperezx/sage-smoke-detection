@@ -79,6 +79,12 @@ Build the image:
 ```
 docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
 ```
+
+Build the image with buildx:
+```
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 --platform linux/amd64,linux/arm64 .
+```
+
 where the `--build-arg` adds all the necessary enviroment variables for the [Sage Storage API](https://github.com/sagecontinuum/sage-storage-api) and [Sage CLI](https://github.com/sagecontinuum/sage-cli)
 
 ## Step 3: Run Docker container locally

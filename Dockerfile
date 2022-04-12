@@ -1,6 +1,10 @@
 FROM waggle/plugin-base:1.1.1-base
-COPY . .
-WORKDIR /src
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY src /src
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade -r /src/requirements.txt
 
@@ -29,5 +33,6 @@ ENV LC_ALL="C.UTF-8" \
     HPWREN_FLAG=${HPWREN_FLAG} \
     TEST_FLAG=${TEST_FLAG}
 
-RUN sage-cli.py storage files download ${BUCKET_ID_MODEL} ${BUCKET_KEY_MODEL}/${MODEL_FILE} --target /src/${MODEL_FILE}
+WORKDIR /src
+RUN curl https://s3-west.nrp-nautilus.io/smokeynet/model.onnx -o /src/model.onnx
 CMD [ "python3","/src/main.py" ]
