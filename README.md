@@ -115,6 +115,22 @@ Perform an inference based on trainned model
 Publish
 ```
 
+Example output of the plugin when HPWREN camera API is used( `export HPWREN_FLAG=True` and `export TEST_FLAG=False`) with smokeynet:
+```
+export SAGE_STORE_URL=https://osn.sagecontinuum.org
+export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
+export BUCKET_KEY_MODEL=2021-05-11
+export MODEL_FILE=model.onnx
+export MODEL_TYPE=smokeynet
+export HPWREN_FLAG=True
+export TEST_FLAG=False
+
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+
+docker run sagecontinuum/sage-smoke-detection:0.1.0
+```
+
+
 Example output of the plugin when the pre-recorded MP4 is used( `export HPWREN_FLAG=False` and `export TEST_FLAG=True`) :
 ```
 export SAGE_STORE_URL=https://osn.sagecontinuum.org

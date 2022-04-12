@@ -47,12 +47,10 @@ else:
 
 camera = Camera(cameraSrc)
 
-
 print('Starting smoke detection inferencing')
 print('Get image from ' + serverName)
 print("Image url: " + imageURL)
 print("Description: " + description)
-
 
 sample = camera.snapshot()
 imageArray = sample.data
@@ -65,12 +63,24 @@ if modelType == 'binary-classifier':
     binaryFire.setImageFromArray(imageArray)
     result  = binaryFire.inference()
     percent = result[1]
+    if percent >= SMOKE_CRITERION_THRESHOLD:
+        sample.save("sample.jpg")
+        plugin.upload_file("sample.jpg", timestamp=timestamp)
+        print('Publish\n', flush=True)
+        plugin.publish(TOPIC_SMOKE, percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
 elif modelType == 'smokeynet':
     print('Using Smokeynet')
-    smokeyNet = SmokeyNet(modelPath)
-
-if percent >= SMOKE_CRITERION_THRESHOLD:
-    sample.save("sample.jpg")
-    plugin.upload_file("sample.jpg", timestamp=timestamp)
-    print('Publish\n', flush=True)
-    plugin.publish(TOPIC_SMOKE, percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+    previousImg = imageArray
+    sample_current = camera.snapshot()
+    currentImg = sample_current.data
+    smokeyNet = SmokeyNet(modelPath,SMOKE_CRITERION_THRESHOLD)
+    image_preds, tile_preds, tile_probs = smokeyNet.inference(currentImg,previousImg)
+    if tile_preds.sum() > 0:
+        sample.save("sample_previous.jpg")
+        plugin.upload_file("sample_previous.jpg", timestamp=timestamp)
+        
+        sample_current.save("sample_current.jpg")
+        plugin.upload_file("sample_current.jpg", timestamp=timestamp)
+        
+        print('Publish\n', flush=True)
+        plugin.publish(TOPIC_SMOKE, tile_probs, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
