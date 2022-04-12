@@ -17,5 +17,7 @@ source:
   build_args:
     BUCKET_ID_MODEL: "719e3f3f-2905-429e-9ef5-20a03436af95"
     SAGE_STORE_URL: "https://osn.sagecontinuum.org"
+    MODEL_FILE: "model.onnx"
+    MODEL_TYPE: "smokeynet"
     HPWREN_FLAG: "False"
     TEST_FLAG: "False"
