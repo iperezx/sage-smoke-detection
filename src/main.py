@@ -83,5 +83,5 @@ elif modelType == 'smokeynet':
         plugin.upload_file("sample_current.jpg", timestamp=timestamp)
         
         print('Publish\n', flush=True)
-        plugin.publish(TOPIC_SMOKE + 'tile_predictions', tile_probs, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
-        plugin.publish(TOPIC_SMOKE + 'image_predictions', image_preds, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+        plugin.publish(TOPIC_SMOKE + 'tile_probs', tile_probs, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+        plugin.publish(TOPIC_SMOKE + 'image_preds', image_preds, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
