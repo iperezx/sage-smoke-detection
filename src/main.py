@@ -7,7 +7,7 @@ from waggle import plugin
 from waggle.data.vision import Camera
 from pathlib import Path
 
-TOPIC_SMOKE = "env.smoke.certainty"
+TOPIC_SMOKE = "env.smoke."
 SMOKE_CRITERION_THRESHOLD=0.5
 modelFileName = os.getenv('MODEL_FILE')
 modelPath = os.path.abspath(modelFileName)
@@ -67,7 +67,7 @@ if modelType == 'binary-classifier':
         sample.save("sample.jpg")
         plugin.upload_file("sample.jpg", timestamp=timestamp)
         print('Publish\n', flush=True)
-        plugin.publish(TOPIC_SMOKE, percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+        plugin.publish(TOPIC_SMOKE + 'certainty', percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
 elif modelType == 'smokeynet':
     print('Using Smokeynet')
     previousImg = imageArray
@@ -83,4 +83,5 @@ elif modelType == 'smokeynet':
         plugin.upload_file("sample_current.jpg", timestamp=timestamp)
         
         print('Publish\n', flush=True)
-        plugin.publish(TOPIC_SMOKE, tile_probs, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+        plugin.publish(TOPIC_SMOKE + 'tile_predictions', tile_probs, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+        plugin.publish(TOPIC_SMOKE + 'image_predictions', image_preds, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
