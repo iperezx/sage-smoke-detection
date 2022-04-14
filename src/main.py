@@ -6,6 +6,7 @@ from distutils.util import strtobool
 from waggle.plugin import Plugin
 from waggle.data.vision import Camera
 from pathlib import Path
+import json
 
 TOPIC_SMOKE = "env.smoke."
 SMOKE_CRITERION_THRESHOLD=0.5
@@ -74,13 +75,13 @@ elif modelType == 'smokeynet':
     currentImg = sample_current.data
     smokeyNet = SmokeyNet(modelPath,SMOKE_CRITERION_THRESHOLD)
     image_preds, tile_preds, tile_probs = smokeyNet.inference(currentImg,previousImg)
-    if tile_preds.sum() > 0:
-        print('Publish\n', flush=True)
-
-        sample.save("sample_previous.jpg")
-        sample_current.save("sample_current.jpg")
-        with Plugin() as plugin:
-            plugin.upload_file("sample_previous.jpg", timestamp=timestamp)
-            plugin.upload_file("sample_current.jpg", timestamp=timestamp)
-            plugin.publish(TOPIC_SMOKE + 'tile_probs', tile_probs, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
-            plugin.publish(TOPIC_SMOKE + 'image_preds', image_preds, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+    print('Publish\n', flush=True)
+    sample.save("sample_previous.jpg")
+    sample_current.save("sample_current.jpg")
+    with Plugin() as plugin:
+        plugin.upload_file("sample_previous.jpg", timestamp=timestamp)
+        plugin.upload_file("sample_current.jpg", timestamp=timestamp)
+        tile_probs_list = tile_probs.tolist()
+        image_preds_list = image_preds.tolist()
+        plugin.publish(TOPIC_SMOKE + 'tile_probs', tile_probs_list, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+        plugin.publish(TOPIC_SMOKE + 'image_preds', image_preds_list, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
