@@ -3,7 +3,7 @@ from inference import BinaryFire,SmokeyNet
 import hpwren
 import os,sys
 from distutils.util import strtobool
-from waggle import plugin
+from waggle.plugin import Plugin
 from waggle.data.vision import Camera
 from pathlib import Path
 
@@ -15,8 +15,6 @@ modelType = os.getenv('MODEL_TYPE')
 TEST_FLAG = strtobool(os.getenv('TEST_FLAG'))
 HPWREN_FLAG = strtobool(os.getenv('HPWREN_FLAG'))
 
-#For plugin
-plugin.init()
 if TEST_FLAG and not HPWREN_FLAG:
     sampleMP4 = '20190610-Pauma-bh-w-mobo-c.mp4'
     cameraSrc = Path(sampleMP4)
@@ -65,9 +63,10 @@ if modelType == 'binary-classifier':
     percent = result[1]
     if percent >= SMOKE_CRITERION_THRESHOLD:
         sample.save("sample.jpg")
-        plugin.upload_file("sample.jpg", timestamp=timestamp)
         print('Publish\n', flush=True)
-        plugin.publish(TOPIC_SMOKE + 'certainty', percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+        with Plugin() as plugin:
+            plugin.upload_file("sample.jpg", timestamp=timestamp)
+            plugin.publish(TOPIC_SMOKE + 'certainty', percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
 elif modelType == 'smokeynet':
     print('Using Smokeynet')
     previousImg = imageArray
@@ -76,12 +75,12 @@ elif modelType == 'smokeynet':
     smokeyNet = SmokeyNet(modelPath,SMOKE_CRITERION_THRESHOLD)
     image_preds, tile_preds, tile_probs = smokeyNet.inference(currentImg,previousImg)
     if tile_preds.sum() > 0:
-        sample.save("sample_previous.jpg")
-        plugin.upload_file("sample_previous.jpg", timestamp=timestamp)
-        
-        sample_current.save("sample_current.jpg")
-        plugin.upload_file("sample_current.jpg", timestamp=timestamp)
-        
         print('Publish\n', flush=True)
-        plugin.publish(TOPIC_SMOKE + 'tile_probs', tile_probs, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
-        plugin.publish(TOPIC_SMOKE + 'image_preds', image_preds, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+
+        sample.save("sample_previous.jpg")
+        sample_current.save("sample_current.jpg")
+        with Plugin() as plugin:
+            plugin.upload_file("sample_previous.jpg", timestamp=timestamp)
+            plugin.upload_file("sample_current.jpg", timestamp=timestamp)
+            plugin.publish(TOPIC_SMOKE + 'tile_probs', tile_probs, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+            plugin.publish(TOPIC_SMOKE + 'image_preds', image_preds, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
