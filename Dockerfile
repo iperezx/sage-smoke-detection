@@ -35,4 +35,4 @@ ENV LC_ALL="C.UTF-8" \
 
 WORKDIR /src
 RUN curl https://s3-west.nrp-nautilus.io/smokeynet/model.onnx -o /src/model.onnx
-CMD [ "python3","/src/main.py" ]
+ENTRYPOINT [ "python3","/src/main.py" ]
