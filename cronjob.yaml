@@ -1,0 +1,32 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: smokeynet
+spec:
+  schedule: "*/2 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: resource.gpu
+                    operator: In
+                    values:
+                    - "true"
+          containers:
+          - name: smokeynet
+            image: registry.sagecontinuum.org/iperezx/wildfire-smoke-detection:0.4.0
+            imagePullPolicy: IfNotPresent
+            resources:
+              requests:
+                cpu: "1"
+                memory: "2G"
+              limits:
+                cpu: "1"
+                memory: "2G"
+            args: ["http://hpwren.ucsd.edu/cameras/L/tje-1-mobo-c.jpg"]
+          restartPolicy: OnFailure
