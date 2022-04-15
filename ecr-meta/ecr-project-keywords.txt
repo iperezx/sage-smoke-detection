@@ -1,4 +1,4 @@
 smoke
 fire
-convolutional neural network
+long short-term memory
 HPWREN
