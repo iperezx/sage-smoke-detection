@@ -1,23 +1,21 @@
 import sys
-import numpy as np
-import inference,hpwren
-import tflite_runtime.interpreter as tflite
-import time,datetime,os,sys,subprocess
-import logging,requests
+from inference import BinaryFire,SmokeyNet
+import hpwren
+import os,sys
 from distutils.util import strtobool
-from waggle import plugin
+from waggle.plugin import Plugin
 from waggle.data.vision import Camera
 from pathlib import Path
+import json
 
-TOPIC_SMOKE = "env.smoke.certainty"
+TOPIC_SMOKE = "env.smoke."
 SMOKE_CRITERION_THRESHOLD=0.5
-modelFileName = 'model.tflite'
+modelFileName = os.getenv('MODEL_FILE')
 modelPath = os.path.abspath(modelFileName)
+modelType = os.getenv('MODEL_TYPE')
 TEST_FLAG = strtobool(os.getenv('TEST_FLAG'))
 HPWREN_FLAG = strtobool(os.getenv('HPWREN_FLAG'))
 
-#For plugin
-plugin.init()
 if TEST_FLAG and not HPWREN_FLAG:
     sampleMP4 = '20190610-Pauma-bh-w-mobo-c.mp4'
     cameraSrc = Path(sampleMP4)
@@ -43,32 +41,46 @@ elif not TEST_FLAG and HPWREN_FLAG:
     serverName = 'HPWREN Camera'
     imageURL,description = camObj.getImageURL(cameraID,siteID)
     cameraSrc = imageURL
+else:
+    sys.exit('Error: not supported case for TEST_FLAG and HPWREN_FLAG.')
 
 camera = Camera(cameraSrc)
 
-
 print('Starting smoke detection inferencing')
-testObj = inference.FireImage()
-
 print('Get image from ' + serverName)
 print("Image url: " + imageURL)
 print("Description: " + description)
 
-
 sample = camera.snapshot()
-image = sample.data
+imageArray = sample.data
 timestamp = sample.timestamp
-testObj.setImageFromArray(image)
 
-interpreter = tflite.Interpreter(model_path=modelPath)
-interpreter.allocate_tensors()
 print('Perform an inference based on trainned model')
-result  = testObj.inference(interpreter)
-percent = result[1]
-
-if percent >= SMOKE_CRITERION_THRESHOLD:
-    sample.save("sample.jpg")
-    plugin.upload_file("sample.jpg", timestamp=timestamp)
+if modelType == 'binary-classifier':
+    print('Using binary classifier')
+    binaryFire = BinaryFire(modelPath)
+    binaryFire.setImageFromArray(imageArray)
+    result  = binaryFire.inference()
+    percent = result[1]
+    if percent >= SMOKE_CRITERION_THRESHOLD:
+        sample.save("sample.jpg")
+        print('Publish\n', flush=True)
+        with Plugin() as plugin:
+            plugin.upload_file("sample.jpg", timestamp=timestamp)
+            plugin.publish(TOPIC_SMOKE + 'certainty', percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+elif modelType == 'smokeynet':
+    print('Using Smokeynet')
+    previousImg = imageArray
+    sample_current = camera.snapshot()
+    timestamp_current = sample_current.timestamp
+    currentImg = sample_current.data
+    smokeyNet = SmokeyNet(modelPath,SMOKE_CRITERION_THRESHOLD)
+    image_preds, tile_preds, tile_probs = smokeyNet.inference(currentImg,previousImg)
     print('Publish\n', flush=True)
-    plugin.publish(TOPIC_SMOKE, percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
-
+    sample.save("sample_previous.jpg")
+    sample_current.save("sample_current.jpg")
+    with Plugin() as plugin:
+        plugin.upload_file("sample_previous.jpg", timestamp=timestamp)
+        plugin.upload_file("sample_current.jpg", timestamp=timestamp_current)
+        tile_probs_list = str(tile_probs.tolist())
+        plugin.publish(TOPIC_SMOKE + 'tile_probs', tile_probs_list, timestamp=timestamp_current,meta={"camera": f'{cameraSrc}'})

@@ -65,7 +65,10 @@ Before building the image make sure that the environment variables (`SAGE_STORE_
 Set enviroment variables:
 ```
 export SAGE_STORE_URL=https://osn.sagecontinuum.org
-export BUCKET_ID_MODEL=BUCKET_ID_MODEL
+export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
+export BUCKET_KEY_MODEL=2021-05-11
+export MODEL_FILE=model.tflite
+export MODEL_TYPE=binary-classifier
 export HPWREN_FLAG=False
 export TEST_FLAG=False
 ```
@@ -74,9 +77,14 @@ The `BUCKET_ID_MODEL` has been set public so any SAGE user can access the smoke 
 
 Build the image:
 ```
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} \
---build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
 ```
+
+Build the image with buildx:
+```
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 --platform linux/amd64,linux/arm64 .
+```
+
 where the `--build-arg` adds all the necessary enviroment variables for the [Sage Storage API](https://github.com/sagecontinuum/sage-storage-api) and [Sage CLI](https://github.com/sagecontinuum/sage-cli)
 
 ## Step 3: Run Docker container locally
@@ -84,11 +92,14 @@ where the `--build-arg` adds all the necessary enviroment variables for the [Sag
 Example output of the plugin when HPWREN camera API is used( `export HPWREN_FLAG=True` and `export TEST_FLAG=False`) :
 ```
 export SAGE_STORE_URL=https://osn.sagecontinuum.org
-export BUCKET_ID_MODEL=BUCKET_ID_MODEL
+export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
+export BUCKET_KEY_MODEL=2021-05-11
+export MODEL_FILE=model.tflite
+export MODEL_TYPE=binary-classifier
 export HPWREN_FLAG=True
 export TEST_FLAG=False
 
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg SAGE_USER_TOKEN=${SAGE_USER_TOKEN} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
 
 docker run sagecontinuum/sage-smoke-detection:0.1.0 
 ```
@@ -110,14 +121,33 @@ Perform an inference based on trainned model
 Publish
 ```
 
-Example output of the plugin when the pre-recorded MP4 is used( `export HPWREN_FLAG=False` and `export TEST_FLAG=True`) :
+Example output of the plugin when HPWREN camera API is used( `export HPWREN_FLAG=True` and `export TEST_FLAG=False`) with smokeynet:
 ```
 export SAGE_STORE_URL=https://osn.sagecontinuum.org
-export BUCKET_ID_MODEL=BUCKET_ID_MODEL
+export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
+export BUCKET_KEY_MODEL=2021-05-11
+export MODEL_FILE=model.onnx
+export MODEL_TYPE=smokeynet
 export HPWREN_FLAG=False
 export TEST_FLAG=True
 
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg SAGE_USER_TOKEN=${SAGE_USER_TOKEN} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+
+docker run sagecontinuum/sage-smoke-detection:0.1.0
+```
+
+
+Example output of the plugin when the pre-recorded MP4 is used( `export HPWREN_FLAG=False` and `export TEST_FLAG=True`) :
+```
+export SAGE_STORE_URL=https://osn.sagecontinuum.org
+export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
+export BUCKET_KEY_MODEL=2021-05-11
+export MODEL_FILE=model.tflite
+export MODEL_TYPE=binary-classifier
+export HPWREN_FLAG=False
+export TEST_FLAG=True
+
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
 
 docker run sagecontinuum/sage-smoke-detection:0.1.0 
 ```
@@ -143,11 +173,14 @@ Publish
 Example output of the plugin when the bottom camera on the Wild Sage Node is used( `export HPWREN_FLAG=False` and `export TEST_FLAG=False`) :
 ```
 export SAGE_STORE_URL=https://osn.sagecontinuum.org
-export BUCKET_ID_MODEL=BUCKET_ID_MODEL
+export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
+export BUCKET_KEY_MODEL=2021-05-11
+export MODEL_FILE=model.tflite
+export MODEL_TYPE=binary-classifier
 export HPWREN_FLAG=False
 export TEST_FLAG=False
 
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg SAGE_USER_TOKEN=${SAGE_USER_TOKEN} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
 
 docker run sagecontinuum/sage-smoke-detection:0.1.0 
 ```

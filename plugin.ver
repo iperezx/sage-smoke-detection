@@ -1,6 +1,6 @@
 [plugin]
 id=50
-version=0.2.0
+version=0.4.0
 name=Smoke Detection Model
 description=Smoke Detection Model.
 reference=https://github.com/iperezx/edge-plugins/tree/master/plugin-smokedetect

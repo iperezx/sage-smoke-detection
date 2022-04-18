@@ -2,7 +2,9 @@ pillow
 pika
 tflite
 requests
-waggle[all] @ https://github.com/waggle-sensor/pywaggle/releases/download/0.46.2/waggle-0.46.2-py3-none-any.whl
+onnx
+onnxruntime
+pywaggle[all]
 git+https://github.com/sagecontinuum/sage-cli.git
 --extra-index-url https://google-coral.github.io/py-repo/ 
 tflite_runtime

@@ -6,7 +6,7 @@ There is no doubt that having the right tools combat both the initiation and pro
 Automatic detection of a fire ignition or the perimeter of an ongoing fire is still a research topic that combines capturing imagery through remote sensing and analyzing the captured imagery through AI [2]. Any infrastructure built to enable these research efforts should provide support for data hosting, model training, model deployment and inference steps of the associated AI process. However, once reliable AI methods for this purpose are available, they have the potential to provide unprecedented edge intelligence capabilities in this domain. This potential made real-time smoke detection also one of the scientific case studies for the Sage AI on the Edge project.
 
 ## Workflow description
-The edge compute environment consist of the sensor data acquisition system (HPWREN cameras [3]) and the smoke detection plugin. The plugin is a trained custom-made convolutional neural network model that classifies HPWREN acquired images as either smoke or no smoke with a specific confidence level. The trainning data comes from the Fire Ignition Library [4] which is an open source image library that consist of historical fires that were labeled as smoke or no smoke 40 minutes before and after the fire started and became visible from the HPWREN cameras.
+The edge compute environment consist of the sensor data acquisition system (HPWREN cameras [3] or Wild Sage Nodes) and the smoke detection plugin. The plugin uses a novel deep learning architecture called SmokeyNet [4] which uses spatiotemporal information from camera imagery for real-time wildfire smoke detection. When trained on the FIgLib dataset, SmokeyNet outperforms comparable baselines and rivals human performance. The trainning data comes from the Fire Ignition Library [5] which is an open source image library that consist of historical fires that were labeled as smoke or no smoke 40 minutes before and after the fire started and became visible from the HPWREN cameras.
 
 ### References
 [1] John Salguero, Jingjing Li, Alireza Farahmand, and John T. Reager. 2020. Wild-fire Trend Analysis over the Contiguous United States Using Remote SensingObservations.Remote Sensing12, 16 (2020). https://doi.org/10.3390/rs12162565.
@@ -15,4 +15,6 @@ The edge compute environment consist of the sensor data acquisition system (HPWR
 
 [3] 2021. Website for High Performance Wireless Research and Education Network.http://hpwren.ucsd.edu
 
-[4] 2021. Labeled Training Data for Smoke Detection in the HPWREN Fire IgnitionImage Library. http://hpwren.ucsd.edu/HPWREN-FIgLib/
+[4] Dewangan, A.; Pande, Y.; Braun, H.-W.; Vernon, F.; Perez, I.; Altintas, I.; Cottrell, G.W.; Nguyen, M.H. FIgLib & SmokeyNet: Dataset and Deep Learning Model for Real-Time Wildland Fire Smoke Detection. Remote Sens. 2022, 14, 1007. https://doi.org/10.3390/rs14041007
+
+[5] 2021. Labeled Training Data for Smoke Detection in the HPWREN Fire IgnitionImage Library. http://hpwren.ucsd.edu/HPWREN-FIgLib/
