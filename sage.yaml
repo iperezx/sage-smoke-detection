@@ -13,7 +13,7 @@ source:
     - linux/amd64
     - linux/arm64
   url: "https://github.com/iperezx/sage-smoke-detection"
-  branch: feature-add-smokeynet
+  branch: master
 inputs:
   - id: "smoke_threshold"
     type: "float"
