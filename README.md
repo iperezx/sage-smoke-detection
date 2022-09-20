@@ -1,109 +1,66 @@
 # sage-smoke-detection
+The edge compute environment consist of the sensor data acquisition system (HPWREN cameras [3] or Wild Sage Nodes) and the smoke detection plugin. The plugin uses a novel deep learning architecture called SmokeyNet [4] which uses spatiotemporal information from camera imagery for real-time wildfire smoke detection. When trained on the FIgLib dataset, SmokeyNet outperforms comparable baselines and rivals human performance. The trainning data comes from the Fire Ignition Library [5] which is an open source image library that consist of historical fires that were labeled as smoke or no smoke 40 minutes before and after the fire started and became visible from the HPWREN cameras. See [references](ecr-meta/ecr-science-description.md)
 
+The rest of the README provides instructions to run the model on different environments.
+
+To re-train the edge model with your own data, please see [trainning README](training/README.md).
+
+The [Dockerfile](Dockerfile) already downloads the most recent versions of both the binary classifier model and Smokeynet (during the build stage) that can be ran on an edge device or locally and for user-convience to test the models.
 ## Instructions
 
-## Step 1: run trainning jupyter notebook and save model
-There are two options to train the smoke detection neural network. The first one is to
-run the jupyter notebook on a Kubernetes cluster (for us it is temporarily going to be [Nautilus](https://nautilus.optiputer.net/)). The second option is to run it locally assuming that there is a GPU availabe on the local node (the docker image might fail but Tensorflow will not).
-### Training on a Kubernetes Cluster (Nautilus):
-Clone the smoke detection model:
+## Step 1: Build Docker image for plugin
+
+Build image:
 ```
-cd training/
-```
-Create a persistent volume claim on Nautilus under the Sage namespace (not needed now since it exists):
-```
-kubectl create -f training.pvc.yaml
+docker build -t sagecontinuum/sage-smoke-detection:0.1.0 .
 ```
 
-Create a deployment on kubernetes:
+Build image with buildx:
 ```
-kubectl create -f training.deployment.yaml
-```
-
-Attach to a pod and run bash:
-```
-kubectl exec -it POD-NAME bash
+docker build -t sagecontinuum/sage-smoke-detection:0.1.0 --platform linux/amd64,linux/arm64 .
 ```
 
-Run jupyter notebook on pod:
+Build image without buildx:
 ```
-jupyter notebook -—ip=0.0.0.0 -—port=9000
-```
-
-Port forward from pod to local node:
-```
-kubectl port-forward POD-NAME 9000:9000
-```
-Access the notebook through your desktops browser on http://localhost:9000 
-
-### Training on a local node(if no kubernetes cluster is available):
-If there is no kubernetes cluster available for the user, there is a docker file that can be used to run on a local node (assuming that there is a GPU available).
-
-Build docker image:
-```
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg SAGE_USER_TOKEN=${SAGE_USER_TOKEN} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL} -t iperezx/training-smokedetect:0.1.0 .
+docker build -t sagecontinuum/sage-smoke-detection:0.1.0 .
 ```
 
-Run docker image:
-```
-docker run -it -p 9000:9000 iperezx/training-smokedetect:0.1.0
-```
+## Step 2: Run Docker container locally or on an edge device
+There are three possible camera inputs and two smoke detector models to configure the plugin and to run the Docker container. 
 
-Attach to container and run jupyter notebook:
+Each combination can be configured in the `.env` file and are outline below.
+An example `.env` file (`.env.example`) is provided. Make a copy of it to use it for the rest of the next steps.
 ```
-docker attach iperezx/training-smokedetect:0.1.0
-jupyter notebook --ip 0.0.0.0 --port 9000 --no-browser --allow-root
+cp .env.example .env
 ```
 
-Access the notebook through your desktops browser on http://localhost:9000 
+Camera inputs:
+- HPWREN camera API: `HPWREN_FLAG=True` and `TEST_FLAG=False` are set in `.env` file
+- Pre-recorded video of a fire (taken from FigLib): `HPWREN_FLAG=True` and `TEST_FLAG=False`
+- Camera connected to an edge device and passed in as a command line argument: `HPWREN_FLAG=False` and `TEST_FLAG=False`
+    - RSTP endpoint that is reacheable on the node
 
-## Step 2: Build Docker image for plugin
--------------
-The docker image is hosted on [sagecontinuum](https://hub.docker.com/orgs/sagecontinuum).
-Before building the image make sure that the environment variables (`SAGE_STORE_URL`,`BUCKET_ID_MODEL`, `HPWREN-FLAG`, and `TEST_FLAG`) are set in the user's local enviroment.
+Smoke Detector Models:
+- Smokeynet (set as default): `MODEL_FILE=model.onnx` and `MODEL_TYPE=smokeynet`
+- Binary classifier model: `MODEL_FILE=model.tflite` and `MODEL_TYPE=binary-classifier`
 
-Set enviroment variables:
-```
-export SAGE_STORE_URL=https://osn.sagecontinuum.org
-export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
-export BUCKET_KEY_MODEL=2021-05-11
-export MODEL_FILE=model.tflite
-export MODEL_TYPE=binary-classifier
-export HPWREN_FLAG=False
-export TEST_FLAG=False
-```
-To obtain a token, visit the [Sage Authorization UI](https://sage.nautilus.optiputer.net).
-The `BUCKET_ID_MODEL` has been set public so any SAGE user can access the smoke detection models.
+Lastly, there are two other environment variables that could be set for running the container on the [Sage Platform](https://docs.waggle-edge.ai/docs/about/overview):
+- TOPIC_SMOKE: The name of the topic to push to [Sage Data Repository](https://docs.waggle-edge.ai/docs/about/architecture) and become publicly accessible to users through the [Data API](https://docs.waggle-edge.ai/docs/tutorials/accessing-data#data-api)
+- PYWAGGLE_LOG_DIR: temporary directory to output the [pywaggle](https://github.com/waggle-sensor/pywaggle) log files for debugging purposes. This is the same format used by the [Data API](https://docs.waggle-edge.ai/docs/tutorials/accessing-data#data-api).
 
-Build the image:
+Run model after setting all the environment variables in `.env` for a specific use-case:
 ```
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
+docker run  -v ${PWD}/pywaggle-logs:/src/pywaggle-logs --env-file=.env sagecontinuum/sage-smoke-detection:0.1.0
 ```
 
-Build the image with buildx:
+Note that setting `-v ${PWD}/pywaggle-logs:/src/pywaggle-logs` allows to show the written files by pywaggle when debugging.
+
+For the case that it is not needed, simply run the container without the volume mount:
 ```
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 --platform linux/amd64,linux/arm64 .
-```
-
-where the `--build-arg` adds all the necessary enviroment variables for the [Sage Storage API](https://github.com/sagecontinuum/sage-storage-api) and [Sage CLI](https://github.com/sagecontinuum/sage-cli)
-
-## Step 3: Run Docker container locally
-
-Example output of the plugin when HPWREN camera API is used( `export HPWREN_FLAG=True` and `export TEST_FLAG=False`) :
-```
-export SAGE_STORE_URL=https://osn.sagecontinuum.org
-export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
-export BUCKET_KEY_MODEL=2021-05-11
-export MODEL_FILE=model.tflite
-export MODEL_TYPE=binary-classifier
-export HPWREN_FLAG=True
-export TEST_FLAG=False
-
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
-
-docker run sagecontinuum/sage-smoke-detection:0.1.0 
+docker run --env-file=.env sagecontinuum/sage-smoke-detection:0.1.0
 ```
 
+Output when plugin is configured to run HPWREN camera API as a camera input:
 ```
 Starting smoke detection inferencing
 Get image from HPWREN Camera
@@ -121,37 +78,7 @@ Perform an inference based on trainned model
 Publish
 ```
 
-Example output of the plugin when HPWREN camera API is used( `export HPWREN_FLAG=True` and `export TEST_FLAG=False`) with smokeynet:
-```
-export SAGE_STORE_URL=https://osn.sagecontinuum.org
-export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
-export BUCKET_KEY_MODEL=2021-05-11
-export MODEL_FILE=model.onnx
-export MODEL_TYPE=smokeynet
-export HPWREN_FLAG=False
-export TEST_FLAG=True
-
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
-
-docker run sagecontinuum/sage-smoke-detection:0.1.0
-```
-
-
-Example output of the plugin when the pre-recorded MP4 is used( `export HPWREN_FLAG=False` and `export TEST_FLAG=True`) :
-```
-export SAGE_STORE_URL=https://osn.sagecontinuum.org
-export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
-export BUCKET_KEY_MODEL=2021-05-11
-export MODEL_FILE=model.tflite
-export MODEL_TYPE=binary-classifier
-export HPWREN_FLAG=False
-export TEST_FLAG=True
-
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
-
-docker run sagecontinuum/sage-smoke-detection:0.1.0 
-```
-
+Example output of the plugin when the pre-recorded MP4 is used:
 ```
 Starting smoke detection inferencing
 Get image from 20190610-Pauma-bh-w-mobo-c.mp4
@@ -162,7 +89,6 @@ Publish
 .
 .
 .
-
 Get image from 20190610-Pauma-bh-w-mobo-c.mp4
 Image url: 20190610-Pauma-bh-w-mobo-c.mp4
 Description: Pre-recorded video
@@ -170,21 +96,7 @@ Perform an inference based on trainned model
 Publish
 ```
 
-Example output of the plugin when the bottom camera on the Wild Sage Node is used( `export HPWREN_FLAG=False` and `export TEST_FLAG=False`) :
-```
-export SAGE_STORE_URL=https://osn.sagecontinuum.org
-export BUCKET_ID_MODEL=719e3f3f-2905-429e-9ef5-20a03436af95
-export BUCKET_KEY_MODEL=2021-05-11
-export MODEL_FILE=model.tflite
-export MODEL_TYPE=binary-classifier
-export HPWREN_FLAG=False
-export TEST_FLAG=False
-
-docker build --build-arg SAGE_STORE_URL=${SAGE_STORE_URL} --build-arg BUCKET_ID_MODEL=${BUCKET_ID_MODEL}  --build-arg MODEL_FILE=${MODEL_FILE} --build-arg MODEL_TYPE=${MODEL_TYPE} --build-arg HPWREN_FLAG=${HPWREN_FLAG} --build-arg TEST_FLAG=${TEST_FLAG} -t sagecontinuum/sage-smoke-detection:0.1.0 .
-
-docker run sagecontinuum/sage-smoke-detection:0.1.0 
-```
-
+Example output of the plugin when the bottom camera on the Wild Sage Node is used:
 ```
 Coming Soon
 ```
