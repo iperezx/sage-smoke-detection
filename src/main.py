@@ -1,6 +1,6 @@
 import argparse
+import configure
 from inference import BinaryFire,SmokeyNet
-import hpwren
 import os,sys
 from distutils.util import strtobool
 from waggle.plugin import Plugin
@@ -52,42 +52,31 @@ TOPIC_SMOKE = os.getenv('TOPIC_SMOKE','env.smoke.')
 MODEL_FILE = os.getenv('MODEL_FILE')
 MODEL_ABS_PATH = os.path.abspath(MODEL_FILE)
 MODEL_TYPE = os.getenv('MODEL_TYPE','smokeynet')
-TEST_FLAG = strtobool(os.getenv('TEST_FLAG'))
-HPWREN_FLAG = strtobool(os.getenv('HPWREN_FLAG'))
+CAMERA_TYPE = os.getenv('CAMERA_TYPE','mp4')
 
-if TEST_FLAG and not HPWREN_FLAG:
-    sampleMP4 = '20190610-Pauma-bh-w-mobo-c.mp4'
-    cameraSrc = Path(sampleMP4)
-    serverName = sampleMP4
-    imageURL = sampleMP4
-    description = 'Pre-recorded video'
-elif not TEST_FLAG and not HPWREN_FLAG:
+if CAMERA_TYPE == 'mp4':
+    camera_device = configure.Recorded_MP4()
+elif CAMERA_TYPE == 'device':
     if camera_endpoint is None:
         print(f'No camera device specified. Exiting...')
         exit(1)
-    cameraSrc = camera_endpoint
-    serverName = cameraSrc
-    imageURL = serverName
-    description = f'{cameraSrc} Camera on Device'
-elif not TEST_FLAG and HPWREN_FLAG:
-    #HPWREN Parameters
-    hpwrenUrl = "https://firemap.sdsc.edu/pylaski/"\
-    "stations?camera=only&selection="\
-    "boundingBox&minLat=0&maxLat=90&minLon=-180&maxLon=0"
-    cameraID=hpwren_camera_id
-    siteID=hpwren_site_id
-    camObj = hpwren.cameras(hpwrenUrl)
-    serverName = 'HPWREN Camera'
-    imageURL,description = camObj.getImageURL(cameraID,siteID)
-    cameraSrc = imageURL
+    camera_device = configure.Camera_Device(camera_endpoint)
+elif CAMERA_TYPE == 'hpwren':
+    camera_device = configure.Hpwren(hpwren_camera_id,hpwren_site_id)
 else:
-    sys.exit('Error: not supported case for TEST_FLAG and HPWREN_FLAG.')
+    sys.exit(f'Error: not supported case for CAMERA_TYPE: {CAMERA_TYPE}.')
 
-camera = Camera(cameraSrc)
+camera_meta = camera_device.get_metadata()
+camera_src = camera_meta['camera_src']
+server_name = camera_meta['server_name']
+image_url = camera_meta['image_url']
+description = camera_meta['description']
+
+camera = Camera(camera_src)
 
 print('Starting smoke detection inferencing')
-print('Get image from ' + serverName)
-print("Image url: " + imageURL)
+print('Get image from ' + server_name)
+print("Image url: " + image_url)
 print("Description: " + description)
 
 sample = camera.snapshot()
@@ -106,7 +95,7 @@ if MODEL_TYPE == 'binary-classifier':
         print('Publish', flush=True)
         with Plugin() as plugin:
             plugin.upload_file("sample.jpg", timestamp=timestamp)
-            plugin.publish(TOPIC_SMOKE + 'certainty', percent, timestamp=timestamp,meta={"camera": f'{cameraSrc}'})
+            plugin.publish(TOPIC_SMOKE + 'certainty', percent, timestamp=timestamp,meta={"camera": f'{camera_src}'})
 elif MODEL_TYPE == 'smokeynet':
     print('Using Smokeynet')
     previousImg = imageArray
@@ -122,4 +111,4 @@ elif MODEL_TYPE == 'smokeynet':
         plugin.upload_file("sample_previous.jpg", timestamp=timestamp)
         plugin.upload_file("sample_current.jpg", timestamp=timestamp_current)
         tile_probs_list = str(tile_probs.tolist())
-        plugin.publish(TOPIC_SMOKE + 'tile_probs', tile_probs_list, timestamp=timestamp_current,meta={"camera": f'{cameraSrc}'})
+        plugin.publish(TOPIC_SMOKE + 'tile_probs', tile_probs_list, timestamp=timestamp_current,meta={"camera": f'{camera_src}'})

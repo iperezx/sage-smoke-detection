@@ -35,9 +35,9 @@ cp .env.example .env
 ```
 
 Camera inputs:
-- HPWREN camera API: `HPWREN_FLAG=True` and `TEST_FLAG=False` are set in `.env` file
-- Pre-recorded video of a fire (taken from FigLib): `HPWREN_FLAG=True` and `TEST_FLAG=False`
-- Camera connected to an edge device and passed in as a command line argument: `HPWREN_FLAG=False` and `TEST_FLAG=False`
+- HPWREN camera API: `CAMERA_TYPE=hpwren` are set in `.env` file
+- Pre-recorded video of a fire (taken from FigLib): `CAMERA_TYPE=mp4`
+- Camera connected to an edge device and passed in as a command line argument: `CAMERA_TYPE=device`
     - RSTP endpoint that is reacheable on the node
 
 Smoke Detector Models:
