@@ -1,11 +1,10 @@
 import argparse
 import configure
 from inference import BinaryFire,SmokeyNet
+import logging
 import os,sys
-from distutils.util import strtobool
 from waggle.plugin import Plugin
 from waggle.data.vision import Camera
-from pathlib import Path
 
 parser = argparse.ArgumentParser(description='Smoke Detector Plugin')
 
@@ -54,6 +53,14 @@ MODEL_ABS_PATH = os.path.abspath(MODEL_FILE)
 MODEL_TYPE = os.getenv('MODEL_TYPE','smokeynet')
 CAMERA_TYPE = os.getenv('CAMERA_TYPE','mp4')
 
+FORMAT = "[%(asctime)s %(filename)s:%(lineno)s]%(levelname)s: %(message)s"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format=FORMAT,
+    datefmt="%Y/%m/%d %H:%M:%S",
+)
+
 if CAMERA_TYPE == 'mp4':
     camera_device = configure.Recorded_MP4()
 elif CAMERA_TYPE == 'device':
@@ -64,7 +71,8 @@ elif CAMERA_TYPE == 'device':
 elif CAMERA_TYPE == 'hpwren':
     camera_device = configure.Hpwren(hpwren_camera_id,hpwren_site_id)
 else:
-    sys.exit(f'Error: not supported case for CAMERA_TYPE: {CAMERA_TYPE}.')
+    logging.error(f'Error: not supported case for CAMERA_TYPE: {CAMERA_TYPE}.')
+    sys.exit()
 
 camera_meta = camera_device.get_metadata()
 camera_src = camera_meta['camera_src']
@@ -74,37 +82,36 @@ description = camera_meta['description']
 
 camera = Camera(camera_src)
 
-print('Starting smoke detection inferencing')
-print('Get image from ' + server_name)
-print("Image url: " + image_url)
-print("Description: " + description)
+logging.info(f'Starting smoke detection inferencing')
+logging.info(f'Get image from {server_name}')
+logging.info(f'Image url: {image_url}')
+logging.info(f'Description: {description}')
+logging.info(f'Using {MODEL_TYPE}')
 
 sample = camera.snapshot()
 imageArray = sample.data
 timestamp = sample.timestamp
 
-print('Perform an inference based on trainned model')
+logging.info('Perform an inference based on trainned model')
 if MODEL_TYPE == 'binary-classifier':
-    print('Using binary classifier')
     binaryFire = BinaryFire(MODEL_ABS_PATH)
     binaryFire.setImageFromArray(imageArray)
     result  = binaryFire.inference()
     percent = result[1]
     if percent >= smoke_threshold:
         sample.save("sample.jpg")
-        print('Publish', flush=True)
+        logging.info('Publish')
         with Plugin() as plugin:
             plugin.upload_file("sample.jpg", timestamp=timestamp)
             plugin.publish(TOPIC_SMOKE + 'certainty', percent, timestamp=timestamp,meta={"camera": f'{camera_src}'})
 elif MODEL_TYPE == 'smokeynet':
-    print('Using Smokeynet')
     previousImg = imageArray
     sample_current = camera.snapshot()
     timestamp_current = sample_current.timestamp
     currentImg = sample_current.data
     smokeyNet = SmokeyNet(MODEL_ABS_PATH,smoke_threshold)
     image_preds, tile_preds, tile_probs = smokeyNet.inference(currentImg,previousImg)
-    print('Publish', flush=True)
+    logging.info('Publish')
     sample.save("sample_previous.jpg")
     sample_current.save("sample_current.jpg")
     with Plugin() as plugin:
