@@ -1,6 +1,9 @@
 import abc
 import hpwren
+from inference import BinaryFire,SmokeyNet
 from pathlib import Path
+from waggle.plugin import Plugin
+from waggle.data.vision import Camera
 
 class CameraDeviceInterface(metaclass=abc.ABCMeta):
     @classmethod
@@ -18,7 +21,7 @@ class CameraDeviceBase(CameraDeviceInterface):
         self.server_name = ''
         self.image_url = ''
         self.description = ''
-    
+
     def get_metadata(self):
         return {
                     'camera_src': self.camera_src,
@@ -26,21 +29,29 @@ class CameraDeviceBase(CameraDeviceInterface):
                     'image_url': self.image_url,
                     'description': self.description
                 }
+    
+    def _set_camera_src(self):
+        self._camera = Camera(self.camera_src)
 
-class Recorded_MP4(CameraDeviceBase):
+    def get_sample(self):
+        return self._camera.snapshot()
+
+class RecordedMP4(CameraDeviceBase):
     def __init__(self):
         self.sample_mp4 = '20190610-Pauma-bh-w-mobo-c.mp4'
         self.camera_src = Path(self.sample_mp4)
         self.server_name = self.sample_mp4
         self.image_url = self.sample_mp4
         self.description = 'Pre-recorded video'
-    
-class Camera_Device(CameraDeviceBase):
+        self._set_camera_src()
+
+class CameraDevice(CameraDeviceBase):
     def __init__(self, camera_endpoint):
         self.camera_src = camera_endpoint
         self.server_name = camera_endpoint
         self.imageURL = camera_endpoint
         self.description = f'{camera_endpoint} Camera on Device'
+        self._set_camera_src()
 
 class Hpwren(CameraDeviceBase):
     def __init__(self,camera_id,site_id):
@@ -53,3 +64,36 @@ class Hpwren(CameraDeviceBase):
         camObj = hpwren.cameras(self.hpwrenUrl)
         self.image_url,self.description = camObj.getImageURL(camera_id,site_id)
         self.camera_src = self.image_url
+        self._set_camera_src()
+
+class ExecuteBase:
+    def __init__(self,MODEL_ABS_PATH,MODEL_TYPE,camera_device):
+        self.MODEL_ABS_PATH = MODEL_ABS_PATH
+        self.MODEL_TYPE = MODEL_TYPE
+        self.init_model()
+        self.camera_device = camera_device
+
+    def init_model(self):
+        if self.MODEL_TYPE == 'binary-classifier':
+            self._model_obj = BinaryFire(self.MODEL_ABS_PATH)
+        elif self.MODEL_TYPE == 'smokeynet':
+            self._model_obj = SmokeyNet(self.MODEL_ABS_PATH)
+
+    def _set_image_sample(self):
+        sample = self.camera_device.get_sample()
+        image = sample.data
+        timestamp = sample.timestamp
+        return sample,image,timestamp
+
+    def set_images(self):
+        self.current_sample,self.current_image,self.current_timestamp = self._set_image_sample()
+        if self.MODEL_TYPE == 'binary-classifier':
+            self.next_sample,self.next_image,self.next_timestamp = None,None,None
+        elif self.MODEL_TYPE == 'smokeynet':
+            self.next_sample,self.next_image,self.next_timestamp = self._set_image_sample()
+    
+    def run(self,smoke_threshold):
+        self.set_images()
+        current_image = self.current_image
+        next_image = self.next_image
+        self.inference_results = self._model_obj.inference(next_image,current_image,smoke_threshold)

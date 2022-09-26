@@ -1,13 +1,29 @@
+import abc
 import onnx
 import onnxruntime
 import numpy as np
 import tflite_runtime.interpreter as tflite
 from PIL import Image
 import sys
-class BinaryFire:
+
+class ModelInterface(metaclass=abc.ABCMeta):
+    @classmethod
+    def __subclasshook__(cls, subclass):
+        return (hasattr(subclass, 'inference') or NotImplemented)
+
+    @abc.abstractmethod
+    def inference(self,current_image,previous_image,smoke_threshold=0.5):
+        """Perform model inference"""
+        raise NotImplementedError
+
+class ModelBase(ModelInterface):
     def __init__(self,modelPath):
-        self.classes = ["No Fire", "Fire"]
         self.modelPath = modelPath
+
+class BinaryFire(ModelBase):
+    def __init__(self,modelPath):
+        super().__init__(modelPath)
+        self.classes = ["No Fire", "Fire"]
         self.setInterpreter()
         self.newsize = (128,128)
         self.scalingfactor = 255.0
@@ -33,7 +49,8 @@ class BinaryFire:
         interpreter.allocate_tensors()
         self.interpreter = interpreter
 
-    def inference(self):
+    def inference(self,next_image,current_image,smoke_threshold=None):
+        self.setImageFromArray(current_image)
         try:
             image = self.image
             input_data = np.expand_dims(image, axis=0)
@@ -59,11 +76,10 @@ class BinaryFire:
         else:
             return "ERROR! Image input is not in correct dimensions!"
 
-class SmokeyNet:
-    def __init__(self,modelPath,smoke_threshold=0.5):
-        self.modelPath = modelPath
+class SmokeyNet(ModelBase):
+    def __init__(self, modelPath):
+        super().__init__(modelPath)
         self.check_model()
-        self.smoke_threshold = smoke_threshold
 
     def check_model(self):
         onnx_model = onnx.load(self.modelPath)
@@ -74,18 +90,18 @@ class SmokeyNet:
     def start_session(self):
         return onnxruntime.InferenceSession(self.modelPath)
 
-    def run_ort(self,ort_session, current_image, previous_image):
-        x = self.generate_input_data(current_image, previous_image)
+    def run_ort(self,ort_session, next_image,current_image,smoke_threshold):
+        x = self.generate_input_data(next_image,current_image)
         ort_inputs = {ort_session.get_inputs()[0].name: x}
         ort_outs = ort_session.run(None, ort_inputs)
         outputs =  ort_outs[0]
-        tile_preds, tile_probs = self.get_preds_and_probs(outputs)
+        tile_preds, tile_probs = self.get_preds_and_probs(outputs,smoke_threshold)
         image_preds = (tile_preds.sum(axis=1) > 0)
         return image_preds, tile_preds, tile_probs
 
-    def inference(self,current_image,previous_image):
+    def inference(self,next_image,current_image,smoke_threshold=0.5):
         ort_session = self.start_session()
-        image_preds, tile_preds, tile_probs = self.run_ort(ort_session, current_image, previous_image)
+        image_preds, tile_preds, tile_probs = self.run_ort(ort_session, next_image,current_image,smoke_threshold)
         return image_preds, tile_preds, tile_probs
 
     def sigmoid(self,z):
@@ -158,7 +174,7 @@ class SmokeyNet:
     def to_numpy(self,tensor):
         return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
 
-    def get_preds_and_probs(self,tile_outputs):
+    def get_preds_and_probs(self,tile_outputs,smoke_threshold=0.5):
         tile_probs = self.sigmoid(tile_outputs)
-        tile_preds = (tile_probs > self.smoke_threshold).astype("uint8")
+        tile_preds = (tile_probs > smoke_threshold).astype("uint8")
         return tile_preds, tile_probs
