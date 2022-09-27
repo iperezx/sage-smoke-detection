@@ -2,8 +2,8 @@ import abc
 import hpwren
 from inference import BinaryFire,SmokeyNet
 from pathlib import Path
-from waggle.plugin import Plugin
 from waggle.data.vision import Camera
+from time import sleep
 
 class CameraDeviceInterface(metaclass=abc.ABCMeta):
     @classmethod
@@ -67,11 +67,12 @@ class Hpwren(CameraDeviceBase):
         self._set_camera_src()
 
 class ExecuteBase:
-    def __init__(self,MODEL_ABS_PATH,MODEL_TYPE,camera_device):
+    def __init__(self,MODEL_ABS_PATH,MODEL_TYPE,camera_device,smokey_net_delay):
         self.MODEL_ABS_PATH = MODEL_ABS_PATH
         self.MODEL_TYPE = MODEL_TYPE
         self.init_model()
         self.camera_device = camera_device
+        self.smokey_net_delay = smokey_net_delay
 
     def init_model(self):
         if self.MODEL_TYPE == 'binary-classifier':
@@ -90,6 +91,7 @@ class ExecuteBase:
         if self.MODEL_TYPE == 'binary-classifier':
             self.next_sample,self.next_image,self.next_timestamp = None,None,None
         elif self.MODEL_TYPE == 'smokeynet':
+            sleep(self.smokey_net_delay)
             self.next_sample,self.next_image,self.next_timestamp = self._set_image_sample()
     
     def run(self,smoke_threshold):

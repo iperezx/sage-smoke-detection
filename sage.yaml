@@ -15,7 +15,7 @@ source:
   url: "https://github.com/iperezx/sage-smoke-detection"
   branch: master
 inputs:
-  - id: "smoke_threshold"
+  - id: "smoke-threshold"
     type: "float"
   - id: "camera"
     type: "string"
@@ -23,3 +23,5 @@ inputs:
     type: "int"
   - id: "hpwren-site-id"
     type: "int"
+  - id: "smokeynet-delay"
+    type: "float"

@@ -38,12 +38,21 @@ parser.add_argument('-hsid',
                         help='Site ID for HPWREN. Optional if HPWREN camera API endpoint is being used.'
                     )
 
+parser.add_argument('-delay',
+                        '--smokeynet-delay',
+                        metavar='smokeynet_delay',
+                        type=float,
+                        default=60.0,
+                        help='SmokeyNet time delay to get the next image from Camera. Default is set to 1 minute due to HPWREN FigLib Trainning Data'
+                    )
+
 args = parser.parse_args()
 
 smoke_threshold=args.smoke_threshold
 camera_endpoint=args.camera
 hpwren_site_id = args.hpwren_site_id
 hpwren_camera_id = args.hpwren_camera_id
+smokeynet_delay = args.smokeynet_delay
 
 TOPIC_SMOKE = os.getenv('TOPIC_SMOKE','env.smoke.')
 MODEL_FILE = os.getenv('MODEL_FILE')
@@ -85,7 +94,7 @@ logging.info(f'Description: {description}')
 logging.info(f'Using {MODEL_TYPE}')
 
 logging.info('Perform an inference based on trainned model')
-execute = configure.ExecuteBase(MODEL_ABS_PATH,MODEL_TYPE,camera_device)
+execute = configure.ExecuteBase(MODEL_ABS_PATH,MODEL_TYPE,camera_device,smokeynet_delay)
 execute.run(smoke_threshold)
 
 logging.info('Publish')
