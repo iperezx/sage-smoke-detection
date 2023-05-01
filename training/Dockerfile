@@ -2,6 +2,8 @@ ARG cuda_version=10.0
 ARG cudnn_version=7
 FROM nvidia/cuda:${cuda_version}-cudnn${cudnn_version}-devel
 
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
+
 RUN apt-get update \
   && apt-get install -y \
   python3-dev \
