@@ -4,7 +4,7 @@ git+https://github.com/sagecontinuum/sage-cli.git
 git+https://github.com/waggle-sensor/pywaggle@v0.29.0
 notebook
 matplotlib
-opencv-python
+opencv-python==4.3.0.38
 regex
 tensorflow-gpu==2.0.0
 keras
