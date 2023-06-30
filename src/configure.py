@@ -49,7 +49,7 @@ class CameraDevice(CameraDeviceBase):
     def __init__(self, camera_endpoint):
         self.camera_src = camera_endpoint
         self.server_name = camera_endpoint
-        self.imageURL = camera_endpoint
+        self.image_url = camera_endpoint
         self.description = f'{camera_endpoint} Camera on Device'
         self._set_camera_src()
 
