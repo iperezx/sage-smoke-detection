@@ -69,12 +69,12 @@ logging.basicConfig(
 )
 
 if CAMERA_TYPE == 'mp4':
-    camera_device = configure.Recorded_MP4()
+    camera_device = configure.RecordedMP4()
 elif CAMERA_TYPE == 'device':
     if camera_endpoint is None:
         print(f'No camera device specified. Exiting...')
         exit(1)
-    camera_device = configure.Camera_Device(camera_endpoint)
+    camera_device = configure.CameraDevice(camera_endpoint)
 elif CAMERA_TYPE == 'hpwren':
     camera_device = configure.Hpwren(hpwren_camera_id,hpwren_site_id)
 else:
