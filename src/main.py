@@ -4,14 +4,15 @@ import logging
 import os,sys
 import publisher
 
-parser = argparse.ArgumentParser(description='Smoke Detector Plugin')
+parser = argparse.ArgumentParser(description='Smoke Detector Plugin',
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('-st',
                         '--smoke_threshold',
                         metavar='smoke_threshold',
                         type=float,
                         default=0.9,
-                        help='Threshold for model inference'
+                        help='Threshold for model inference (only used for binary classifier)'
                     )
 
 parser.add_argument('-c',
@@ -20,6 +21,15 @@ parser.add_argument('-c',
                         type=str,
                         required=False,
                         help='Camera endpoint connected to the edge device.'
+                    )
+
+parser.add_argument('-ct',
+                        '--camera-type',
+                        metavar='camera_type',
+                        type=str,
+                        default='mp4',
+                        choices=['mp4', 'device', 'hpwren'],
+                        help='Camera type'
                     )
 
 parser.add_argument('-hcid',
@@ -43,7 +53,31 @@ parser.add_argument('-delay',
                         metavar='smokeynet_delay',
                         type=float,
                         default=60.0,
-                        help='SmokeyNet time delay to get the next image from Camera. Default is set to 1 minute due to HPWREN FigLib Trainning Data'
+                        help='SmokeyNet time delay to get the next image from Camera (seconds). Default is set to 60 secs due to HPWREN FigLib Trainning Data'
+                    )
+
+parser.add_argument('-sdt',
+                        '--sage-data-topic',
+                        metavar='sage_data_topic',
+                        type=str,
+                        default='env.smoke.',
+                        help='Sage data topic'
+                    )
+
+parser.add_argument('-mf',
+                        '--model-file-name',
+                        metavar='model_file_name',
+                        type=str,
+                        default='model.onnx',
+                        help='Model file name'
+                    )
+
+parser.add_argument('-mt',
+                        '--model-type',
+                        metavar='model_type',
+                        type=str,
+                        default='smokeynet',
+                        help='Edge model type'
                     )
 
 args = parser.parse_args()
@@ -54,11 +88,11 @@ hpwren_site_id = args.hpwren_site_id
 hpwren_camera_id = args.hpwren_camera_id
 smokeynet_delay = args.smokeynet_delay
 
-TOPIC_SMOKE = os.getenv('TOPIC_SMOKE','env.smoke.')
-MODEL_FILE = os.getenv('MODEL_FILE')
-MODEL_ABS_PATH = os.path.abspath(MODEL_FILE)
-MODEL_TYPE = os.getenv('MODEL_TYPE','smokeynet')
-CAMERA_TYPE = os.getenv('CAMERA_TYPE','mp4')
+sage_data_topic = args.sage_data_topic
+model_file = args.model_file_name
+model_abs_path = os.path.abspath(model_file)
+model_type = args.model_type
+camera_type = args.camera_type
 
 FORMAT = "[%(asctime)s %(filename)s:%(lineno)s]%(levelname)s: %(message)s"
 
@@ -68,17 +102,17 @@ logging.basicConfig(
     datefmt="%Y/%m/%d %H:%M:%S",
 )
 
-if CAMERA_TYPE == 'mp4':
+if camera_type == 'mp4':
     camera_device = configure.RecordedMP4()
-elif CAMERA_TYPE == 'device':
+elif camera_type == 'device':
     if camera_endpoint is None:
         print(f'No camera device specified. Exiting...')
         exit(1)
     camera_device = configure.CameraDevice(camera_endpoint)
-elif CAMERA_TYPE == 'hpwren':
+elif camera_type == 'hpwren':
     camera_device = configure.Hpwren(hpwren_camera_id,hpwren_site_id)
 else:
-    logging.error(f'Error: not supported case for CAMERA_TYPE: {CAMERA_TYPE}.')
+    logging.error(f'Error: not supported case for CAMERA_TYPE: {camera_type}.')
     sys.exit()
 
 camera_meta = camera_device.get_metadata()
@@ -91,12 +125,12 @@ logging.info(f'Starting smoke detection inferencing')
 logging.info(f'Get image from {server_name}')
 logging.info(f'Image url: {image_url}')
 logging.info(f'Description: {description}')
-logging.info(f'Using {MODEL_TYPE}')
+logging.info(f'Using {model_type}')
 
 logging.info('Perform an inference based on trainned model')
-execute = configure.ExecuteBase(MODEL_ABS_PATH,MODEL_TYPE,camera_device,smokeynet_delay)
+execute = configure.ExecuteBase(model_abs_path,model_type,camera_device,smokeynet_delay)
 execute.run(smoke_threshold)
 
 logging.info('Publish')
-publisher_waggle = publisher.PublisherWaggle(MODEL_TYPE,execute)
-publisher_waggle.publish(TOPIC_SMOKE,smoke_threshold,camera_src)
+publisher_waggle = publisher.PublisherWaggle(model_type,execute)
+publisher_waggle.publish(sage_data_topic,smoke_threshold,camera_src)

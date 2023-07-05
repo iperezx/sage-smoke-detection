@@ -26,38 +26,75 @@ docker build -t sagecontinuum/sage-smoke-detection:0.1.0 .
 ```
 
 ## Step 2: Run Docker container locally or on an edge device
-There are three possible camera inputs and two smoke detector models to configure the plugin and to run the Docker container. 
+There are three possible camera inputs and two smoke detector models to configure the plugin and to run the Docker container through command line arguments.
 
-Each combination can be configured in the `.env` file and are outline below.
-An example `.env` file (`.env.example`) is provided. Make a copy of it to use it for the rest of the next steps.
+To get help with how to set the command line arguments:
 ```
-cp .env.example .env
+docker run sagecontinuum/sage-smoke-detection:0.1.0 --help
+```
+Output:
+```
+usage: main.py [-h] [-st smoke_threshold] [-c camera_endpoint]
+               [-ct camera_type] [-hcid hpwren_camera_id]
+               [-hsid hpwren_site_id] [-delay smokeynet_delay]
+               [-sdt sage_data_topic] [-mf model_file_name] [-mt model_type]
+
+Smoke Detector Plugin
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -st smoke_threshold, --smoke_threshold smoke_threshold
+                        Threshold for model inference (only used for binary
+                        classifier) (default: 0.9)
+  -c camera_endpoint, --camera camera_endpoint
+                        Camera endpoint connected to the edge device.
+                        (default: None)
+  -ct camera_type, --camera-type camera_type
+                        Camera type (default: mp4)
+  -hcid hpwren_camera_id, --hpwren-camera-id hpwren_camera_id
+                        Camera ID for HPWREN. Optional if HPWREN camera API
+                        endpoint is being used. (default: 0)
+  -hsid hpwren_site_id, --hpwren-site-id hpwren_site_id
+                        Site ID for HPWREN. Optional if HPWREN camera API
+                        endpoint is being used. (default: 0)
+  -delay smokeynet_delay, --smokeynet-delay smokeynet_delay
+                        SmokeyNet time delay to get the next image from Camera
+                        (seconds). Default is set to 60 secs due to HPWREN
+                        FigLib Trainning Data (default: 60.0)
+  -sdt sage_data_topic, --sage-data-topic sage_data_topic
+                        Sage data topic (default: env.smoke.)
+  -mf model_file_name, --model-file-name model_file_name
+                        Model file name (default: model.onnx)
+  -mt model_type, --model-type model_type
+                        Edge model type (default: smokeynet)
 ```
 
 Camera inputs:
-- HPWREN camera API: `CAMERA_TYPE=hpwren` are set in `.env` file
-- Pre-recorded video of a fire (taken from FigLib): `CAMERA_TYPE=mp4`
-- Camera connected to an edge device and passed in as a command line argument: `CAMERA_TYPE=device`
-    - RSTP endpoint that is reacheable on the node
+- (Default) Pre-recorded video of a fire (taken from FigLib): `--camera-type mp4`
+- HPWREN camera API: `--camera-type hpwren`
+- Camera connected to an edge device and passed in as a command line argument: `--camera-type device`
+    - Also must set the an endpoint that is reacheable on the node. RTSP example: `--camera rtsp://sage:rtspstream@127.0.0.1/axis-media/media.amp`
 
 Smoke Detector Models:
-- Smokeynet (set as default): `MODEL_FILE=model.onnx` and `MODEL_TYPE=smokeynet`
-- Binary classifier model: `MODEL_FILE=model.tflite` and `MODEL_TYPE=binary-classifier`
+- Smokeynet (set as default): `--model-file-name model.onnx` and `--model-type smokeynet`
+- Binary classifier model: `--model-file-name model.tflite` and `--model-type binary-classifier`
 
-Lastly, there are two other environment variables that could be set for running the container on the [Sage Platform](https://docs.waggle-edge.ai/docs/about/overview):
-- TOPIC_SMOKE: The name of the topic to push to [Sage Data Repository](https://docs.waggle-edge.ai/docs/about/architecture) and become publicly accessible to users through the [Data API](https://docs.waggle-edge.ai/docs/tutorials/accessing-data#data-api)
+For setting the sage data topic (`--sage-data-topic env.smoke.`):
+- The name of the topic to push to [Sage Data Repository](https://docs.waggle-edge.ai/docs/about/architecture) and become publicly accessible to users through the [Data API](https://docs.waggle-edge.ai/docs/tutorials/accessing-data#data-api)
+
+Lastly, there is one environment variables that could be set for running the container in debug mode or when not running on a Sage Node [Sage Platform](https://docs.waggle-edge.ai/docs/about/overview):
 - PYWAGGLE_LOG_DIR: temporary directory to output the [pywaggle](https://github.com/waggle-sensor/pywaggle) log files for debugging purposes. This is the same format used by the [Data API](https://docs.waggle-edge.ai/docs/tutorials/accessing-data#data-api).
 
-Run model after setting all the environment variables in `.env` for a specific use-case:
+Run model:
 ```
-docker run  -v ${PWD}/pywaggle-logs:/src/pywaggle-logs --env-file=.env sagecontinuum/sage-smoke-detection:0.1.0
+docker run  -v ${PWD}/pywaggle-logs:/src/pywaggle-logs --env PYWAGGLE_LOG_DIR=pywaggle-logs sagecontinuum/sage-smoke-detection:0.1.0
 ```
 
-Note that setting `-v ${PWD}/pywaggle-logs:/src/pywaggle-logs` allows to show the written files by pywaggle when debugging.
+Note that setting `-v ${PWD}/pywaggle-logs:/src/pywaggle-logs --env PYWAGGLE_LOG_DIR=pywaggle-logs` allows to show the written files by pywaggle when debugging.
 
-For the case that it is not needed, simply run the container without the volume mount:
+For the case that it is not needed, simply run the container without the volume mount and the env var:
 ```
-docker run --env-file=.env sagecontinuum/sage-smoke-detection:0.1.0
+docker run sagecontinuum/sage-smoke-detection:0.1.0
 ```
 
 Output when plugin is configured to run HPWREN camera API as a camera input:
