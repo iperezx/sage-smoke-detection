@@ -114,4 +114,3 @@ class ExecuteBase:
         current_image = self.current_image
         next_image = self.next_image
         self.inference_results = self._model_obj.inference(next_image,current_image,smoke_threshold)
-        
