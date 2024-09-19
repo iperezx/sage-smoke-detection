@@ -92,11 +92,10 @@ class ExecuteBase:
     def _set_image_sample_from_stream(self, target_frame):
         for frame, sample in enumerate(self.camera_device.get_stream()):
             if frame == target_frame:
-                print(f"Found our frame: {frame}")
                 image = sample.data
                 timestamp = sample.timestamp
-                return sample,image,timestamp
-        raise Exception(f"Could not find frame {target_frame}")
+                return sample, image, timestamp
+        raise Exception(f"Couldnt find frame {target_frame}")
 
     def set_images(self):
         self.current_sample,self.current_image,self.current_timestamp = self._set_image_sample()
@@ -104,37 +103,15 @@ class ExecuteBase:
             self.next_sample,self.next_image,self.next_timestamp = None,None,None
         elif self.MODEL_TYPE == 'smokeynet':
             if isinstance(self.camera_device, RecordedMP4):
-                self.next_sample,self.next_image,self.next_timestamp = self._set_image_sample_from_stream(self.smokey_net_delay)
+                self.next_sample, self.next_image, self.next_timestamp = \
+                    self._set_image_sample_from_stream(self.smokey_net_delay)
             else:
                 sleep(self.smokey_net_delay)
                 self.next_sample,self.next_image,self.next_timestamp = self._set_image_sample()
-            # tuna
-            #frame, frame_of_interest = 0, 50
-            #for frame, sample in enumerate(self.camera_device._camera.stream()):
-            #    self.next_sample = sample
-            #    self.next_image = sample.data
-            #    self.next_timestamp = sample.timestamp
-            #    print(f"Frame {frame:02}")
-            #    # if frame >= frame_of_interest:
-            #    #     print(f"Found our frame: {frame:02}")
-            #    #     break
-                
 
-    
     def run(self,smoke_threshold):
         self.set_images()
-
-        print("Writing to disk")
-        self.current_sample.save("sample_current.jpg")
-        self.next_sample.save("sample_next.jpg")
-        print("current_image", self.current_image.shape)
-        print("next_image", self.next_image.shape)
-
         current_image = self.current_image
         next_image = self.next_image
         self.inference_results = self._model_obj.inference(next_image,current_image,smoke_threshold)
-        image_preds, tile_preds, tile_probs = self.inference_results
-        print("image_preds:", image_preds)
-        print("tile_preds:", tile_preds)
-        print("tile_probs:", tile_probs)
         
