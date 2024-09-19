@@ -53,7 +53,7 @@ parser.add_argument('-delay',
                         metavar='smokeynet_delay',
                         type=float,
                         default=60.0,
-                        help='SmokeyNet time delay to get the next image from Camera (seconds). Default is set to 60 secs due to HPWREN FigLib Trainning Data'
+                        help='SmokeyNet delay to get the next image from Camera. (seconds) for real-time video and (frames) for recorded video. Default is set to 60 due to HPWREN FigLib Trainning Data'
                     )
 
 parser.add_argument('-sdt',
@@ -133,4 +133,4 @@ execute.run(smoke_threshold)
 
 logging.info('Publish')
 publisher_waggle = publisher.PublisherWaggle(model_type,execute)
-publisher_waggle.publish(sage_data_topic,smoke_threshold,camera_src)
+# publisher_waggle.publish(sage_data_topic,smoke_threshold,camera_src)
