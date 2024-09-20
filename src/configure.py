@@ -36,6 +36,9 @@ class CameraDeviceBase(CameraDeviceInterface):
     def get_sample(self):
         return self._camera.snapshot()
 
+    def get_stream(self):
+        return self._camera.stream()
+
 class RecordedMP4(CameraDeviceBase):
     def __init__(self):
         self.sample_mp4 = '20190610-Pauma-bh-w-mobo-c.mp4'
@@ -86,14 +89,26 @@ class ExecuteBase:
         timestamp = sample.timestamp
         return sample,image,timestamp
 
+    def _set_image_sample_from_stream(self, target_frame):
+        for frame, sample in enumerate(self.camera_device.get_stream()):
+            if frame == target_frame:
+                image = sample.data
+                timestamp = sample.timestamp
+                return sample, image, timestamp
+        raise Exception(f"Couldnt find frame {target_frame}")
+
     def set_images(self):
         self.current_sample,self.current_image,self.current_timestamp = self._set_image_sample()
         if self.MODEL_TYPE == 'binary-classifier':
             self.next_sample,self.next_image,self.next_timestamp = None,None,None
         elif self.MODEL_TYPE == 'smokeynet':
-            sleep(self.smokey_net_delay)
-            self.next_sample,self.next_image,self.next_timestamp = self._set_image_sample()
-    
+            if isinstance(self.camera_device, RecordedMP4):
+                self.next_sample, self.next_image, self.next_timestamp = \
+                    self._set_image_sample_from_stream(self.smokey_net_delay)
+            else:
+                sleep(self.smokey_net_delay)
+                self.next_sample,self.next_image,self.next_timestamp = self._set_image_sample()
+
     def run(self,smoke_threshold):
         self.set_images()
         current_image = self.current_image
