@@ -3,6 +3,7 @@ import configure
 import logging
 import os,sys
 import publisher
+import trigger
 
 parser = argparse.ArgumentParser(description='Smoke Detector Plugin',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -131,6 +132,9 @@ logging.info('Perform an inference based on trainned model')
 execute = configure.ExecuteBase(model_abs_path,model_type,camera_device,smokeynet_delay)
 execute.run(smoke_threshold)
 
+logging.info('Trigger if smoke detected')
+triggerer = trigger.Trigger(model_type, execute)
+
 logging.info('Publish')
 publisher_waggle = publisher.PublisherWaggle(model_type,execute)
-publisher_waggle.publish(sage_data_topic,smoke_threshold,camera_src)
+# publisher_waggle.publish(sage_data_topic,smoke_threshold,camera_src)
