@@ -132,8 +132,14 @@ logging.info('Perform an inference based on trainned model')
 execute = configure.ExecuteBase(model_abs_path,model_type,camera_device,smokeynet_delay)
 execute.run(smoke_threshold)
 
-logging.info('Trigger if smoke detected')
-triggerer = trigger.Trigger(model_type, execute)
+logging.info('Trigger if smoke is detected')
+lat_lon = [32.848132, -116.805901]
+logging.warning(f'Using dummy lat_lon: {lat_lon}')
+trig = trigger.Trigger()
+if trig.predictSmoke(model_type, execute):
+    trig.trigger(lat_lon)
+    for status in trig.statuses:
+        logging.info(f"Trigger status: {status}")
 
 logging.info('Publish')
 publisher_waggle = publisher.PublisherWaggle(model_type,execute)
