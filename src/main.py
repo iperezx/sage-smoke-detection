@@ -143,4 +143,4 @@ if trig.predictSmoke(model_type, execute):
 
 logging.info('Publish')
 publisher_waggle = publisher.PublisherWaggle(model_type,execute)
-# publisher_waggle.publish(sage_data_topic,smoke_threshold,camera_src)
+publisher_waggle.publish(sage_data_topic,smoke_threshold,camera_src)
